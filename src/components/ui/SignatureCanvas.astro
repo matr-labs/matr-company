@@ -1,0 +1,359 @@
+---
+import { cn } from "@lib/cn";
+
+interface Props {
+  src: string;
+  class?: string;
+}
+
+const { src, class: className } = Astro.props;
+---
+
+<div data-signature data-src={src} class={cn("relative h-full w-full", className)}>
+  <canvas data-stage class="absolute inset-0 h-full w-full"></canvas>
+
+  {/* ── Control panel ──────────────────────────────────────────────── */}
+  <div
+    data-panel
+    class="absolute right-3 top-3 z-20 w-48 select-none rounded-md border border-border bg-surface/90 p-3 font-mono text-xs text-text shadow-lg backdrop-blur"
+  >
+    <p class="mb-3 uppercase tracking-wide text-muted">Ripple</p>
+    <div class="space-y-2">
+      <label class="ctl-row">
+        <span>Distort</span>
+        <input type="range" data-param="distort" min="0" max="80" value="30" class="ctl-input" />
+      </label>
+      <label class="ctl-row">
+        <span>Radius</span>
+        <input type="range" data-param="radius" min="60" max="120" value="110" class="ctl-input" />
+      </label>
+      <label class="ctl-row">
+        <span>Strength</span>
+        <input type="range" data-param="strength" min="2" max="60" value="6" class="ctl-input" />
+      </label>
+      <label class="ctl-row">
+        <span>Damping</span>
+        <input type="range" data-param="damping" min="80" max="100" value="93" class="ctl-input" />
+      </label>
+      <label class="ctl-row">
+        <span>Feather</span>
+        <input type="range" data-param="feather" min="1" max="40" value="12" class="ctl-input" />
+      </label>
+      <label class="ctl-row">
+        <span>Split</span>
+        <input type="range" data-param="split" min="0" max="40" value="16" class="ctl-input" />
+      </label>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ctl-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .ctl-row > span {
+    color: var(--color-muted);
+  }
+  .ctl-input {
+    width: 6rem;
+    accent-color: var(--color-accent);
+    background: transparent;
+  }
+</style>
+
+<script>
+  // ── Signature animation: water-ripple distortion ──────────────────────
+  // A ping-pong wave simulation: the cursor injects "pressure" that
+  // propagates like ripples on water; a render pass refracts the image by the
+  // wave gradient and adds a thin specular highlight. Adapted from the
+  // cg-gentlerain reference (Three.js + GLSL), running over the image.
+  import * as THREE from "three";
+
+  const reduce = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const simVertex = /* glsl */ `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
+
+  const simFragment = /* glsl */ `
+    uniform sampler2D textureA;
+    uniform vec2 mouse;
+    uniform vec2 resolution;
+    uniform float uStrength;
+    uniform float uRadius;
+    uniform float uDamping;
+    uniform int frame;
+    varying vec2 vUv;
+
+    const float delta = 1.4;
+
+    void main() {
+      vec2 uv = vUv;
+      if (frame == 0) { gl_FragColor = vec4(0.0); return; }
+
+      vec4 data = texture2D(textureA, uv);
+      float pressure = data.x;
+      float pVel = data.y;
+
+      vec2 texelSize = 1.0 / resolution;
+      float p_right = texture2D(textureA, uv + vec2(texelSize.x, 0.0)).x;
+      float p_left  = texture2D(textureA, uv + vec2(-texelSize.x, 0.0)).x;
+      float p_up    = texture2D(textureA, uv + vec2(0.0, texelSize.y)).x;
+      float p_down  = texture2D(textureA, uv + vec2(0.0, -texelSize.y)).x;
+
+      if (uv.x <= texelSize.x) p_left = p_right;
+      if (uv.x >= 1.0 - texelSize.x) p_right = p_left;
+      if (uv.y <= texelSize.y) p_down = p_up;
+      if (uv.y >= 1.0 - texelSize.y) p_up = p_down;
+
+      pVel += delta * (-2.0 * pressure + p_right + p_left) / 4.0;
+      pVel += delta * (-2.0 * pressure + p_up + p_down) / 4.0;
+      pressure += delta * pVel;
+      pVel -= 0.005 * delta * pressure;
+      pVel *= 1.0 - 0.002 * delta;
+      pressure *= uDamping;
+
+      vec2 mouseUV = mouse / resolution;
+      if (mouse.x > 0.0) {
+        float dist = distance(uv, mouseUV);
+        if (dist <= uRadius) {
+          pressure += uStrength * (1.0 - dist / uRadius);
+        }
+      }
+
+      gl_FragColor = vec4(pressure, pVel, (p_right - p_left) / 2.0, (p_up - p_down) / 2.0);
+    }
+  `;
+
+  const renderFragment = /* glsl */ `
+    uniform sampler2D textureA;  // wave state
+    uniform sampler2D textureB;  // image
+    uniform vec2 uImgScale;      // cover-fit
+    uniform float uDistort;
+    uniform float uFeather;      // soft edge falloff
+    uniform float uSplit;        // RGB misregistration strength
+    varying vec2 vUv;
+
+    void main() {
+      vec4 data = texture2D(textureA, vUv);
+
+      // Feather the effect to zero toward the borders so ripples never tug
+      // the image at the edges — keeps it soft and contained.
+      float edge =
+        smoothstep(0.0, uFeather, vUv.x) * smoothstep(0.0, uFeather, 1.0 - vUv.x) *
+        smoothstep(0.0, uFeather, vUv.y) * smoothstep(0.0, uFeather, 1.0 - vUv.y);
+
+      vec2 distortion = uDistort * data.zw * edge;
+      vec2 uvImg = (vUv - 0.5) * uImgScale + 0.5 + distortion;
+      vec4 color = texture2D(textureB, uvImg);
+
+      // Misregistration: a small constant RGB offset plus a ripple-driven part
+      // so the colour plates separate where the waves are. Feathered.
+      vec2 chroma = (vec2(0.004, 0.0) + data.zw * 2.0) * edge * uSplit;
+      float r = texture2D(textureB, uvImg + chroma).r;
+      float b = texture2D(textureB, uvImg - chroma).b;
+      vec3 rgb = vec3(r, color.g, b);
+
+      vec3 normal = normalize(vec3(-data.z * 2.0, 0.5, -data.w * 2.0));
+      vec3 lightDir = normalize(vec3(-3.0, 10.0, 3.0));
+      float specular = pow(max(0.0, dot(normal, lightDir)), 60.0) * 1.0 * edge;
+
+      gl_FragColor = vec4(rgb + specular, color.a);
+    }
+  `;
+
+  function setup(root: HTMLElement) {
+    const canvas = root.querySelector<HTMLCanvasElement>("[data-stage]");
+    const srcUrl = root.dataset.src;
+    if (!canvas || !srcUrl) return;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const scene = new THREE.Scene();
+    const simScene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const rtOpts = {
+      type: THREE.HalfFloatType,
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      depthBuffer: false,
+      stencilBuffer: false,
+    };
+    let rtA = new THREE.WebGLRenderTarget(1, 1, rtOpts);
+    let rtB = new THREE.WebGLRenderTarget(1, 1, rtOpts);
+
+    const mouse = new THREE.Vector2(0, 0);
+
+    const simMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        textureA: { value: null },
+        mouse: { value: mouse },
+        resolution: { value: new THREE.Vector2(1, 1) },
+        uStrength: { value: 0.3 }, // very subtle by default
+        uRadius: { value: 0.11 }, // large, feathered ripple
+        uDamping: { value: 0.93 }, // ripples settle quickly
+        frame: { value: 0 },
+      },
+      vertexShader: simVertex,
+      fragmentShader: simFragment,
+    });
+
+    const renderMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        textureA: { value: null },
+        textureB: { value: null },
+        uImgScale: { value: new THREE.Vector2(1, 1) },
+        uDistort: { value: 0.3 },
+        uFeather: { value: 0.12 },
+        uSplit: { value: 0.4 },
+      },
+      vertexShader: simVertex,
+      fragmentShader: renderFragment,
+      transparent: true,
+    });
+
+    const plane = new THREE.PlaneGeometry(2, 2);
+    simScene.add(new THREE.Mesh(plane, simMaterial));
+    scene.add(new THREE.Mesh(plane, renderMaterial));
+
+    let w = 0;
+    let h = 0;
+    let dpr = 1;
+    let imgAspect = 1;
+    let ready = false;
+    let running = false;
+    let frame = 0;
+    let raf = 0;
+
+    function updateCover() {
+      if (!w || !h) return;
+      const canvasAspect = w / h;
+      const ratio = imgAspect / canvasAspect;
+      const sx = ratio > 1 ? 1 / ratio : 1;
+      const sy = ratio > 1 ? 1 : ratio;
+      renderMaterial.uniforms.uImgScale.value.set(sx, sy);
+    }
+
+    function resize() {
+      w = root.clientWidth;
+      h = root.clientHeight;
+      if (!w || !h) return;
+      dpr = Math.min(window.devicePixelRatio, 2);
+      renderer.setSize(w, h, false);
+      const pw = Math.round(w * dpr);
+      const ph = Math.round(h * dpr);
+      rtA.setSize(pw, ph);
+      rtB.setSize(pw, ph);
+      simMaterial.uniforms.resolution.value.set(pw, ph);
+      frame = 0; // reset the simulation for the new buffer size
+      updateCover();
+    }
+
+    new THREE.TextureLoader().load(srcUrl, (tex) => {
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      tex.wrapS = THREE.ClampToEdgeWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      renderMaterial.uniforms.textureB.value = tex;
+      imgAspect = tex.image.width / tex.image.height;
+      ready = true;
+      resize();
+      start();
+    });
+
+    function renderFrameOnce() {
+      // Render the current wave state (or a flat image when frame is reset).
+      renderMaterial.uniforms.textureA.value = rtA.texture;
+      renderer.setRenderTarget(null);
+      renderer.render(scene, camera);
+    }
+
+    function loop() {
+      if (!running) return;
+      simMaterial.uniforms.frame.value = frame++;
+      simMaterial.uniforms.textureA.value = rtA.texture;
+      renderer.setRenderTarget(rtB);
+      renderer.render(simScene, camera);
+
+      renderMaterial.uniforms.textureA.value = rtB.texture;
+      renderer.setRenderTarget(null);
+      renderer.render(scene, camera);
+
+      const tmp = rtA;
+      rtA = rtB;
+      rtB = tmp;
+
+      raf = requestAnimationFrame(loop);
+    }
+
+    function start() {
+      stop();
+      if (!ready) return;
+      if (reduce()) {
+        frame = 0;
+        renderFrameOnce(); // static image, no ripples
+        return;
+      }
+      running = true;
+      raf = requestAnimationFrame(loop);
+    }
+
+    function stop() {
+      running = false;
+      cancelAnimationFrame(raf);
+    }
+
+    // ── Interaction ───────────────────────────────────────────────────────
+    canvas.addEventListener("pointermove", (e) => {
+      const r = canvas.getBoundingClientRect();
+      mouse.x = (e.clientX - r.left) * dpr;
+      mouse.y = (r.height - (e.clientY - r.top)) * dpr; // flip Y for GL space
+    });
+    canvas.addEventListener("pointerleave", () => mouse.set(0, 0));
+
+    const ro = new ResizeObserver(() => {
+      resize();
+      if (!running) renderFrameOnce();
+    });
+    ro.observe(root);
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) e.isIntersecting ? start() : stop();
+      },
+      { threshold: 0.05 },
+    );
+    io.observe(canvas);
+
+    // ── Panel ─────────────────────────────────────────────────────────────
+    root.querySelectorAll<HTMLInputElement>("[data-param]").forEach((inp) =>
+      inp.addEventListener("input", () => {
+        const key = inp.dataset.param;
+        const val = +inp.value;
+        if (key === "distort") renderMaterial.uniforms.uDistort.value = val / 100;
+        else if (key === "radius") simMaterial.uniforms.uRadius.value = val / 1000;
+        else if (key === "strength") simMaterial.uniforms.uStrength.value = val / 20;
+        else if (key === "damping") simMaterial.uniforms.uDamping.value = val / 100;
+        else if (key === "feather") renderMaterial.uniforms.uFeather.value = val / 100;
+        else if (key === "split") renderMaterial.uniforms.uSplit.value = val / 40;
+      }),
+    );
+  }
+
+  function init() {
+    document
+      .querySelectorAll<HTMLElement>("[data-signature]")
+      .forEach((root) => setup(root));
+  }
+
+  document.addEventListener("astro:page-load", init);
+</script>
