@@ -1,6 +1,6 @@
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
-import node from "@astrojs/node";
+import vercel from "@astrojs/vercel/serverless";
 import { config } from "./src/config/index.ts";
 import { lqip } from "./plugins/lqip.mjs";
 
@@ -14,7 +14,7 @@ export default defineConfig({
   ],
 
   output: "hybrid",
-  adapter: node({ mode: "standalone" }),
+  adapter: vercel(),
 
   vite: {
     plugins: [lqip(config.image.placeholder)],

@@ -108,7 +108,7 @@ const { class: className } = Astro.props;
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #ff2d2d; /* red marker / period */
+    background: #F54927; /* red marker / period */
     opacity: 0;
     pointer-events: none;
     will-change: transform, opacity;
@@ -174,22 +174,21 @@ const { class: className } = Astro.props;
   // fades in. A small dot rides the print front (bottom→top, sine wobble),
   // then flies to the end of the wordmark to become its period.
 
-  const GREEN = "#00b140";
+  const GREEN = "#27F561";
   const WHITE = "#ffffff";
 
   // Phase durations (ms) at 100% speed.
   const BASE_HOLD = 600; // green hold before printing
   const BASE_REVEAL = 800; // slower, constant-speed print
   const BASE_FILL = 650;
-  const BASE_HOLD2 = 1000; // let the wordmark read before the finale
+  const BASE_HOLD2 = 800; // let the wordmark read before the finale
   const FRONT = 0.16; // softness of the reveal front
   const SPRAY = 0; // randomness of the front edge
 
   const SHIFT = 16; // wordmark left nudge (matches .is-nudged transform)
   const GAP = 8; // gap before the period
   const DOT = 18; // dot size (matches .loader-dot)
-  const AMP = 0.04; // gentle sway amplitude (fraction of width)
-  const CYCLES = 1.5; // a single soft swing over the travel
+  const SIDE_Y = 0.55; // height (fraction) where the dot bounces off the side
 
   const easeInOutCubic = (t: number) =>
     t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -386,8 +385,29 @@ const { class: className } = Astro.props;
         setDot(w / 2, h, 0); // hidden during the green hold
       } else {
         const dp = Math.min(1, (e - hold) / dotTravelDur());
-        const x = w / 2 + Math.sin(dp * Math.PI * CYCLES) * (w * AMP);
-        setDot(x, h * (1 - 0.5 * dp), 1); // rise only to midway, not the top
+        // Bounce path (constant speed): start bottom-centre → strike the right
+        // wall → reflect up to the top. At the top it goes off to the period.
+        const r = DOT / 2;
+        const ax = w / 2;
+        const ay = h; // start, bottom-centre
+        const bx = w - r;
+        const by = h * SIDE_Y; // side bounce (right wall)
+        const cx = w / 2;
+        const cy = r; // top bounce (top edge)
+        const lenAB = Math.hypot(bx - ax, by - ay);
+        const lenBC = Math.hypot(cx - bx, cy - by);
+        const split = lenAB / (lenAB + lenBC);
+        let dx, dy;
+        if (dp < split) {
+          const t = dp / split; // bottom → side
+          dx = ax + (bx - ax) * t;
+          dy = ay + (by - ay) * t;
+        } else {
+          const t = (dp - split) / (1 - split); // side → top
+          dx = bx + (cx - bx) * t;
+          dy = by + (cy - by) * t;
+        }
+        setDot(dx, dy, 1);
         if (dp >= 1) {
           // Dot reaches the top → wordmark nudges, dot goes to its place.
           if (!logoShown) {
