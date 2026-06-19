@@ -1,0 +1,476 @@
+---
+import { cn } from "@lib/cn";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div data-loader class={cn("relative h-full w-full overflow-hidden", className)}>
+  <canvas data-stage class="absolute inset-0 h-full w-full"></canvas>
+
+  {/* Black square that pops in behind the mark in the finale. */}
+  <div data-bg class="loader-bg"></div>
+
+  {/* Wordmark, split so "matr" and "abs" can squash away, leaving "l". */}
+  <div data-logo class="loader-logo">
+    <span data-word class="loader-word"><span class="loader-side loader-left">matr&nbsp;</span><span class="loader-keep">l </span><span class="loader-side loader-right">abs</span></span>
+  </div>
+  <span data-dot class="loader-dot"></span>
+
+  {/* ── Control panel ──────────────────────────────────────────────── */}
+  <div
+    data-panel
+    class="absolute right-3 top-3 z-20 w-44 select-none rounded-md border border-border bg-surface/90 p-3 font-mono text-xs text-text shadow-lg backdrop-blur"
+  >
+    <p class="mb-3 uppercase tracking-wide text-muted">Loader</p>
+    <div class="space-y-2">
+      <button type="button" data-action="play" class="ctl-btn w-full">Play ▷</button>
+      <label class="ctl-row">
+        <span>Size</span>
+        <input type="range" data-param="cell" min="24" max="80" value="48" class="ctl-input" />
+      </label>
+      <label class="ctl-row">
+        <span>Speed</span>
+        <input type="range" data-param="speed" min="50" max="200" value="100" class="ctl-input" />
+      </label>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Black square that pops in behind the mark in the finale. */
+  .loader-bg {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-size: clamp(2rem, 9vw, 6rem); /* match the wordmark → snug square */
+    width: 1em;
+    height: 1em;
+    background: #0a0a0a;
+    /* recentre on the "l" (its visual centre sits above the line centre) */
+    transform: translate(-50%, -50%) scaleX(0);
+    transform-origin: center;
+    z-index: 10;
+    pointer-events: none;
+    transition: transform 0.42s cubic-bezier(0.82, 0, 0.2, 1.3);
+  }
+
+  .loader-logo {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition:
+      opacity 0.8s ease,
+      transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+  .loader-logo.is-in {
+    opacity: 1;
+    transform: translateY(0); /* fade in, centred */
+  }
+  .loader-logo.is-nudged {
+    transform: translate(-16px, 0); /* later: nudge left to seat the period */
+  }
+  .loader-word {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: clamp(2rem, 9vw, 6rem);
+    letter-spacing: -0.05em;
+    color: #0a0a0a;
+    white-space: nowrap;
+  }
+  .loader-side {
+    display: inline-block;
+    vertical-align: bottom; /* bottom-aligned → immune to the overflow baseline shift */
+    transition:
+      width 0.5s cubic-bezier(0.5, 0, 0.2, 1),
+      opacity 0.35s ease;
+  }
+  .loader-keep {
+    display: inline-block;
+    vertical-align: bottom; /* keep the "l" put while the sides collapse */
+    transition:
+      color 0.3s ease,
+      transform 0.42s cubic-bezier(0.82, 0, 0.2, 1.3);
+  }
+  .loader-dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 20;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ff2d2d; /* red marker / period */
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+
+  /* ── Finale: a held beat, then everything crashes into place. ── */
+  .squash .loader-bg {
+    transform: translate(-50%, -50% ) scaleX(1); /* same offset as base → no vertical move */
+  }
+  .squash .loader-logo {
+    transform: none; /* recentre → nudges right */
+    transition: transform 0.42s cubic-bezier(0.82, 0, 0.2, 1.3);
+  }
+  .squash .loader-side {
+    width: 0 !important;
+    opacity: 0;
+    overflow: hidden; /* clip the glyphs only while collapsing */
+    transition:
+      width 0.42s cubic-bezier(0.82, 0, 0.2, 1.3),
+      opacity 0.2s ease;
+  }
+  .squash .loader-keep {
+    color: #ffffff;
+    transform: translate(-8px, 0); 
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loader-logo {
+      transition: none;
+    }
+  }
+
+  .ctl-btn {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.35rem 0;
+    color: var(--color-text);
+    transition: background 0.15s;
+  }
+  .ctl-btn:hover {
+    background: var(--color-bg);
+  }
+  .ctl-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .ctl-row > span {
+    color: var(--color-muted);
+  }
+  .ctl-input {
+    width: 5.5rem;
+    accent-color: var(--color-accent);
+    background: transparent;
+  }
+</style>
+
+<script>
+  // ── Intro loader ───────────────────────────────────────────────────────
+  // Hold on green → white sparkles emerge bottom→top (negative space is exact
+  // circles) → sparkles morph into squares turning the screen white → logo
+  // fades in. A small dot rides the print front (bottom→top, sine wobble),
+  // then flies to the end of the wordmark to become its period.
+
+  const GREEN = "#00b140";
+  const WHITE = "#ffffff";
+
+  // Phase durations (ms) at 100% speed.
+  const BASE_HOLD = 600; // green hold before printing
+  const BASE_REVEAL = 800; // slower, constant-speed print
+  const BASE_FILL = 650;
+  const BASE_HOLD2 = 1000; // let the wordmark read before the finale
+  const FRONT = 0.16; // softness of the reveal front
+  const SPRAY = 0; // randomness of the front edge
+
+  const SHIFT = 16; // wordmark left nudge (matches .is-nudged transform)
+  const GAP = 8; // gap before the period
+  const DOT = 18; // dot size (matches .loader-dot)
+  const AMP = 0.04; // gentle sway amplitude (fraction of width)
+  const CYCLES = 1.5; // a single soft swing over the travel
+
+  const easeInOutCubic = (t: number) =>
+    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const easeOutBack = (t: number) => {
+    const c1 = 1.70158;
+    const c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  };
+  const reduce = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function setup(root: HTMLElement) {
+    const stage = root.querySelector<HTMLCanvasElement>("[data-stage]");
+    const logoEl = root.querySelector<HTMLElement>("[data-logo]");
+    const wordEl = root.querySelector<HTMLElement>("[data-word]");
+    const dotEl = root.querySelector<HTMLElement>("[data-dot]");
+    if (!stage || !logoEl || !wordEl || !dotEl) return;
+    const canvas: HTMLCanvasElement = stage;
+    const logo: HTMLElement = logoEl;
+    const word: HTMLElement = wordEl;
+    const dot: HTMLElement = dotEl;
+    const c2d = canvas.getContext("2d");
+    if (!c2d) return;
+    const ctx: CanvasRenderingContext2D = c2d;
+
+    const p = { cell: 48, speed: 1 };
+    const holdDur = () => BASE_HOLD / p.speed;
+    const revealDur = () => BASE_REVEAL / p.speed;
+    const fillDur = () => BASE_FILL / p.speed;
+    const hold2Dur = () => BASE_HOLD2 / p.speed;
+    // Dot is slower than the print: it spans the print plus the wordmark's
+    // idle (read) time, then settles into the period — derived, not hardcoded.
+    const dotTravelDur = () => revealDur() + fillDur() + hold2Dur();
+
+    let w = 0;
+    let h = 0;
+    let cols = 0;
+    let rows = 0;
+    let thresh = new Float32Array(0);
+    let playing = false;
+    let done = false;
+    let startTime = 0;
+    let raf = 0;
+    let timers: number[] = [];
+    let logoShown = false;
+
+    function buildGrid() {
+      cols = Math.max(1, Math.ceil(w / p.cell));
+      rows = Math.max(1, Math.ceil(h / p.cell));
+      thresh = new Float32Array(cols * rows);
+      for (let row = 0; row < rows; row++) {
+        const yNorm = rows > 1 ? row / (rows - 1) : 0; // 0 top → 1 bottom
+        const base = 1 - yNorm; // bottom reveals first
+        for (let col = 0; col < cols; col++) {
+          thresh[row * cols + col] = base * (1 - SPRAY) + Math.random() * SPRAY;
+        }
+      }
+    }
+
+    function resize() {
+      w = root.clientWidth;
+      h = root.clientHeight;
+      if (!w || !h) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      buildGrid();
+    }
+
+    // Square box of half-size R with circular bites of radius b at the four
+    // corners. b = R → 4-point sparkle (exact-circle negative space); b = 0 →
+    // square. Animating b morphs sparkle → square.
+    function addShape(cx: number, cy: number, R: number, b: number) {
+      if (b < 0.5) {
+        ctx.rect(cx - R - 0.5, cy - R - 0.5, 2 * R + 1, 2 * R + 1);
+        return;
+      }
+      ctx.moveTo(cx - R + b, cy - R);
+      ctx.lineTo(cx + R - b, cy - R);
+      ctx.arc(cx + R, cy - R, b, Math.PI, Math.PI / 2, true);
+      ctx.lineTo(cx + R, cy + R - b);
+      ctx.arc(cx + R, cy + R, b, -Math.PI / 2, -Math.PI, true);
+      ctx.lineTo(cx - R + b, cy + R);
+      ctx.arc(cx - R, cy + R, b, 0, -Math.PI / 2, true);
+      ctx.lineTo(cx - R, cy - R + b);
+      ctx.arc(cx - R, cy - R, b, Math.PI / 2, 0, true);
+      ctx.closePath();
+    }
+
+    function fillBg(color: string) {
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    function drawSparkles(front: number) {
+      fillBg(GREEN);
+      const half = p.cell / 2;
+      ctx.fillStyle = WHITE;
+      ctx.beginPath();
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const th = thresh[row * cols + col];
+          if (front < th) continue;
+          const age = Math.min(1, (front - th) / FRONT);
+          const s = half * Math.max(0, easeOutBack(age));
+          if (s > 0.5) addShape(col * p.cell + half, row * p.cell + half, s, s);
+        }
+      }
+      ctx.fill();
+    }
+
+    function drawSquares(b: number) {
+      fillBg(GREEN);
+      const half = p.cell / 2;
+      ctx.fillStyle = WHITE;
+      ctx.beginPath();
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          addShape(col * p.cell + half, row * p.cell + half, half, b);
+        }
+      }
+      ctx.fill();
+    }
+
+    // ── Dot ───────────────────────────────────────────────────────────────
+    function setDot(x: number, y: number, opacity: number) {
+      dot.style.transition = "none";
+      dot.style.opacity = String(opacity);
+      dot.style.transform = `translate(${x - DOT / 2}px, ${y - DOT / 2}px)`;
+    }
+
+    function periodTarget() {
+      // Measured while the wordmark is risen but not yet nudged, so subtract
+      // the pending SHIFT to land where the period will finally sit.
+      const rr = root.getBoundingClientRect();
+      const wr = word.getBoundingClientRect();
+      const fs = parseFloat(getComputedStyle(word).fontSize) || 48;
+      const cy = (wr.top + wr.bottom) / 2 - rr.top;
+      return {
+        x: wr.right - rr.left - SHIFT + GAP,
+        y: cy + fs * 0.3, // baseline-ish
+      };
+    }
+
+    function dotToPeriod(animate: boolean) {
+      const t = periodTarget();
+      dot.style.transition = animate
+        ? "transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease"
+        : "none";
+      dot.style.opacity = "1";
+      dot.style.transform = `translate(${t.x - DOT / 2}px, ${t.y - DOT / 2}px)`;
+    }
+
+    function dotToMark(animate: boolean) {
+      // Sit beside the centred "l" — both inside the black square.
+      const fs = parseFloat(getComputedStyle(word).fontSize) || 48;
+      const x = w / 2 + fs * 0.22; // more space between the "l" and the dot
+      const y = h / 2 + fs * 0.3;
+      dot.style.transition = animate
+        ? "transform 0.42s cubic-bezier(0.82, 0, 0.2, 1.3)"
+        : "none";
+      dot.style.opacity = "1";
+      dot.style.transform = `translate(${x - DOT / 2 + 3}px, ${y - DOT / 2 - 6}px)`;
+    }
+
+    // ── Loop ──────────────────────────────────────────────────────────────
+    function loop(now: number) {
+      if (!playing) return;
+      if (!startTime) startTime = now;
+      const e = now - startTime;
+      const hold = holdDur();
+      const rev = revealDur();
+      const fill = fillDur();
+
+      const printEnd = hold + rev + fill;
+
+      // ── Print (canvas), on its own schedule ──
+      if (e < hold) {
+        fillBg(GREEN); // hold on green
+      } else if (e < hold + rev) {
+        drawSparkles(Math.min(1, (e - hold) / rev) * (1 + FRONT));
+      } else if (e < printEnd) {
+        drawSquares((p.cell / 2) * (1 - easeInOutCubic((e - hold - rev) / fill)));
+      } else {
+        fillBg(WHITE); // solid white
+        if (!logoShown) {
+          logo.classList.add("is-in"); // "matr labs" fades in while the dot still climbs
+          logoShown = true;
+        }
+      }
+
+      // ── Dot: slower than the print, so it's still climbing when the text appears ──
+      if (e < hold) {
+        setDot(w / 2, h, 0); // hidden during the green hold
+      } else {
+        const dp = Math.min(1, (e - hold) / dotTravelDur());
+        const x = w / 2 + Math.sin(dp * Math.PI * CYCLES) * (w * AMP);
+        setDot(x, h * (1 - 0.5 * dp), 1); // rise only to midway, not the top
+        if (dp >= 1) {
+          // Dot reaches the top → wordmark nudges, dot goes to its place.
+          if (!logoShown) {
+            logo.classList.add("is-in");
+            logoShown = true;
+          }
+          logo.classList.add("is-nudged");
+          dotToPeriod(true);
+          timers.push(window.setTimeout(enterSquash, hold2Dur())); // finale beat
+          playing = false;
+          done = true;
+          return;
+        }
+      }
+      raf = requestAnimationFrame(loop);
+    }
+
+    function enterSquash() {
+      // Give the side spans explicit widths so they can transition to 0.
+      root.querySelectorAll<HTMLElement>(".loader-side").forEach((s) => {
+        s.style.width = `${s.scrollWidth}px`;
+      });
+      void root.offsetWidth; // force reflow
+      root.classList.add("squash");
+      dotToMark(true); // dot travels to sit beside the "l", inside the square
+    }
+
+    function play() {
+      cancelAnimationFrame(raf);
+      timers.forEach((t) => clearTimeout(t));
+      timers = [];
+      logo.classList.remove("is-in", "is-nudged");
+      root.classList.remove("squash");
+      root.querySelectorAll<HTMLElement>(".loader-side").forEach((s) => (s.style.width = ""));
+      logoShown = false;
+      done = false;
+      if (reduce()) {
+        fillBg(WHITE);
+        logo.classList.add("is-in", "is-nudged");
+        root.classList.add("squash");
+        dotToMark(false);
+        return;
+      }
+      setDot(w / 2, h, 0);
+      startTime = 0;
+      playing = true;
+      raf = requestAnimationFrame(loop);
+    }
+
+    // ── Wiring ────────────────────────────────────────────────────────────
+    window.addEventListener("resize", () => {
+      resize();
+      if (done) {
+        fillBg(WHITE);
+        dotToMark(false);
+      } else if (!playing) {
+        fillBg(GREEN);
+      }
+    });
+
+    root
+      .querySelector<HTMLButtonElement>('[data-action="play"]')
+      ?.addEventListener("click", play);
+
+    root.querySelectorAll<HTMLInputElement>("[data-param]").forEach((inp) =>
+      inp.addEventListener("input", () => {
+        const key = inp.dataset.param;
+        const val = +inp.value;
+        if (key === "speed") p.speed = val / 100;
+        else if (key === "cell") {
+          p.cell = val;
+          buildGrid();
+        }
+      }),
+    );
+
+    resize();
+    play(); // auto-play on load
+  }
+
+  function init() {
+    document.querySelectorAll<HTMLElement>("[data-loader]").forEach((root) => setup(root));
+  }
+
+  document.addEventListener("astro:page-load", init);
+</script>

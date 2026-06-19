@@ -1,17 +1,63 @@
 ---
 // ⚠️ TEMPORARY SANDBOX — the real home page is saved at index.astro.bak.
 // To restore: copy index.astro.bak back over index.astro.
-// Signature animation: full-res image with swappable interactions.
+// Switch between the two signature animations to preview each.
 import BaseLayout from "@layouts/BaseLayout.astro";
+import Loader from "@ui/Loader.astro";
 import SignatureCanvas from "@ui/SignatureCanvas.astro";
 import placeholder from "@assets/images/test-large.jpg";
 ---
 
 <BaseLayout seo={{ title: "Animation sandbox", titleAbsolute: true, noindex: true }}>
-  <section
-    data-theme="dark"
-    class="relative min-h-svh overflow-hidden bg-bg text-text"
-  >
-    <SignatureCanvas src={placeholder.src} class="absolute inset-0" />
+  <section class="relative min-h-svh overflow-hidden">
+    <div data-view="loader" class="absolute inset-0">
+      <Loader class="absolute inset-0" />
+    </div>
+    <div data-view="ripple" class="absolute inset-0 hidden">
+      <SignatureCanvas src={placeholder.src} class="absolute inset-0" />
+    </div>
+
+    {/* View switcher */}
+    <div
+      class="fixed left-3 top-3 z-30 flex gap-1 rounded-md border border-border bg-surface/90 p-1 font-mono text-xs shadow-lg backdrop-blur"
+    >
+      <button type="button" data-switch="loader" class="view-btn is-active">Loader</button>
+      <button type="button" data-switch="ripple" class="view-btn">Ripple</button>
+    </div>
   </section>
 </BaseLayout>
+
+<style>
+  .view-btn {
+    border-radius: var(--radius-sm);
+    padding: 0.35rem 0.7rem;
+    color: var(--color-muted);
+    transition: all 0.15s;
+  }
+  .view-btn:hover {
+    color: var(--color-text);
+  }
+  .view-btn.is-active {
+    background: var(--color-accent);
+    color: var(--color-surface);
+  }
+</style>
+
+<script>
+  function initSwitch() {
+    const views: Record<string, HTMLElement | null> = {
+      loader: document.querySelector<HTMLElement>('[data-view="loader"]'),
+      ripple: document.querySelector<HTMLElement>('[data-view="ripple"]'),
+    };
+    const btns = document.querySelectorAll<HTMLButtonElement>("[data-switch]");
+    btns.forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const key = btn.dataset.switch ?? "loader";
+        views.loader?.classList.toggle("hidden", key !== "loader");
+        views.ripple?.classList.toggle("hidden", key !== "ripple");
+        btns.forEach((b) => b.classList.toggle("is-active", b === btn));
+      }),
+    );
+  }
+  document.addEventListener("astro:page-load", initSwitch);
+</script>

@@ -1,5 +1,5 @@
 export const site = {
-  name: "Matr Labs",
+  name: "matr labs",
   tagline: "Lorem ipsum dolor sit amet consectetur.",
   url: "https://example.com",
 
