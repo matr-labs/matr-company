@@ -1,0 +1,58 @@
+---
+import { Image } from "astro:assets";
+import { cn } from "@lib/cn";
+
+interface Props {
+  src: ImageMetadata | string;
+  alt: string;
+  width?: number;
+  height?: number;
+  loading?: "lazy" | "eager";
+  format?: "webp" | "avif" | "png" | "jpg";
+  sizes?: string;
+  rounded?: boolean;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  loading = "lazy",
+  format = "webp",
+  sizes,
+  rounded = false,
+  class: className,
+} = Astro.props;
+
+const classes = cn("h-auto w-full object-cover", rounded && "rounded-lg", className);
+const decoding = loading === "eager" ? "sync" : "async";
+---
+
+{
+  typeof src === "string" ? (
+    <img
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      loading={loading}
+      decoding={decoding}
+      sizes={sizes}
+      class={classes}
+    />
+  ) : (
+    <Image
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      loading={loading}
+      decoding={decoding}
+      format={format}
+      sizes={sizes}
+      class={classes}
+    />
+  )
+}

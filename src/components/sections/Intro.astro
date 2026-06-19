@@ -1,0 +1,20 @@
+---
+import Section from "@ui/Section.astro";
+import Heading from "@ui/Heading.astro";
+import Text from "@ui/Text.astro";
+
+interface Props {
+  title: string;
+  body: string;
+  tone?: "bg" | "surface";
+}
+
+const { title, body, tone = "surface" } = Astro.props;
+---
+
+<Section tone={tone} width="narrow">
+  <div class="grid gap-6 md:grid-cols-[1fr_1.4fr] md:gap-12">
+    <Heading level={2} size="lg">{title}</Heading>
+    <Text size="md" tone="muted" measure>{body}</Text>
+  </div>
+</Section>

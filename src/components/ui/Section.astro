@@ -1,0 +1,40 @@
+---
+import { cn } from "@lib/cn";
+import Container from "./Container.astro";
+
+interface Props {
+  tag?: keyof HTMLElementTagNameMap;
+  tone?: "bg" | "surface" | "accent";
+  contained?: boolean;
+  width?: "default" | "narrow" | "full";
+  id?: string;
+  class?: string;
+}
+
+const {
+  tag: Tag = "section",
+  tone = "bg",
+  contained = true,
+  width = "default",
+  id,
+  class: className,
+} = Astro.props;
+
+const tones = {
+  bg: "bg-bg text-text",
+  surface: "bg-surface text-text",
+  accent: "bg-accent text-surface",
+};
+---
+
+<Tag id={id} class={cn("py-section", tones[tone], className)}>
+  {
+    contained ? (
+      <Container width={width}>
+        <slot />
+      </Container>
+    ) : (
+      <slot />
+    )
+  }
+</Tag>

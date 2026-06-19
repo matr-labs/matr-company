@@ -1,0 +1,42 @@
+---
+import Section from "@ui/Section.astro";
+import Heading from "@ui/Heading.astro";
+import Text from "@ui/Text.astro";
+
+interface Feature {
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+interface Props {
+  title?: string;
+  items: Feature[];
+  columns?: 2 | 3 | 4;
+}
+
+const { title, items, columns = 3 } = Astro.props;
+
+const cols = {
+  2: "sm:grid-cols-2",
+  3: "sm:grid-cols-2 lg:grid-cols-3",
+  4: "sm:grid-cols-2 lg:grid-cols-4",
+};
+---
+
+<Section>
+  {title && <Heading level={2} size="lg" align="center" class="mb-12">{title}</Heading>}
+
+  <ul class:list={["grid grid-cols-1 gap-6", cols[columns]]}>
+    {
+      items.map((item) => (
+        <li class="rounded-lg border border-border bg-surface p-6">
+          <Heading level={3} size="base">{item.title}</Heading>
+          <Text tone="muted" size="sm" class="mt-2">
+            {item.description}
+          </Text>
+        </li>
+      ))
+    }
+  </ul>
+</Section>

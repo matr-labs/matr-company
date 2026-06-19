@@ -1,0 +1,77 @@
+---
+import { cn } from "@lib/cn";
+
+interface Props {
+  tag?: "p" | "span" | "div";
+  size?: "xs" | "sm" | "base" | "md" | "lg";
+  tone?: "text" | "muted";
+  weight?: "normal" | "medium" | "semibold" | "bold";
+  leading?: "none" | "tight" | "snug" | "normal" | "relaxed";
+  tracking?: "tighter" | "tight" | "normal" | "wide";
+  align?: "left" | "center";
+  measure?: boolean;
+  class?: string;
+}
+
+const {
+  tag: Tag = "p",
+  size = "base",
+  tone = "text",
+  weight = "normal",
+  leading = "normal",
+  tracking = "normal",
+  align = "left",
+  measure = false,
+  class: className,
+} = Astro.props;
+
+const sizes = {
+  xs: "text-xs",
+  sm: "text-sm",
+  base: "text-base",
+  md: "text-md",
+  lg: "text-lg",
+};
+
+const tones = {
+  text: "text-text",
+  muted: "text-muted",
+};
+
+const weights = {
+  normal: "font-normal",
+  medium: "font-medium",
+  semibold: "font-semibold",
+  bold: "font-bold",
+};
+
+const leadings = {
+  none: "leading-none",
+  tight: "leading-tight",
+  snug: "leading-snug",
+  normal: "leading-normal",
+  relaxed: "leading-relaxed",
+};
+
+const trackings = {
+  tighter: "tracking-tighter",
+  tight: "tracking-tight",
+  normal: "tracking-normal",
+  wide: "tracking-wide",
+};
+---
+
+<Tag
+  class={cn(
+    sizes[size],
+    tones[tone],
+    weights[weight],
+    leadings[leading],
+    trackings[tracking],
+    align === "center" && "text-center",
+    measure && "max-w-prose",
+    className,
+  )}
+>
+  <slot />
+</Tag>

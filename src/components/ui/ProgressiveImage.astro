@@ -1,0 +1,102 @@
+---
+import { cn } from "@lib/cn";
+import { config } from "@config";
+import { getResponsive, getLqip, shouldUseProgressive } from "@utils/image";
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  sizes?: string;
+  loading?: "lazy" | "eager";
+  rounded?: boolean;
+  threshold?: number;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  sizes = config.image.defaultSizes,
+  loading = config.image.defaultLoading,
+  rounded = false,
+  threshold = config.image.progressiveMinWidth,
+  class: className,
+} = Astro.props;
+
+const image = await getResponsive(src, { sizes });
+const placeholder = getLqip(src);
+const progressive = shouldUseProgressive(src, threshold) && Boolean(placeholder);
+
+const { blurPx, scale } = config.image.visual;
+const { durationMs, easing } = config.image.transition;
+
+const wrapperStyle = `aspect-ratio:${image.width} / ${image.height}`;
+const placeholderStyle = `filter:blur(${blurPx}px);transform:scale(${scale})`;
+const hiresStyle = `opacity:0;transition:opacity ${durationMs}ms ${easing}`;
+---
+
+{
+  progressive ? (
+    <div
+      class={cn("relative overflow-hidden bg-border", rounded && "rounded-lg", className)}
+      style={wrapperStyle}
+    >
+      <img
+        src={placeholder}
+        alt=""
+        aria-hidden="true"
+        class="absolute inset-0 h-full w-full object-cover"
+        style={placeholderStyle}
+      />
+      <img
+        src={image.src}
+        srcset={image.srcSet}
+        sizes={sizes}
+        width={image.width}
+        height={image.height}
+        alt={alt}
+        loading={loading}
+        decoding="async"
+        data-hires
+        class="absolute inset-0 h-full w-full object-cover"
+        style={hiresStyle}
+      />
+    </div>
+  ) : (
+    <img
+      src={image.src}
+      srcset={image.srcSet}
+      sizes={sizes}
+      width={image.width}
+      height={image.height}
+      alt={alt}
+      loading={loading}
+      decoding="async"
+      class={cn("h-auto w-full object-cover", rounded && "rounded-lg", className)}
+    />
+  )
+}
+
+<noscript>
+  <style>
+    img[data-hires] {
+      opacity: 1 !important;
+    }
+  </style>
+</noscript>
+
+<script>
+  function reveal(img: HTMLImageElement) {
+    img.style.opacity = "1";
+  }
+
+  function revealAll() {
+    const images = document.querySelectorAll<HTMLImageElement>("img[data-hires]");
+    for (const img of images) {
+      if (img.complete) reveal(img);
+      else img.addEventListener("load", () => reveal(img), { once: true });
+    }
+  }
+
+  document.addEventListener("astro:page-load", revealAll);
+</script>

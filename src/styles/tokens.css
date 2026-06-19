@@ -1,0 +1,54 @@
+:root {
+  --color-bg: #fafafa;
+  --color-surface: #ffffff;
+  --color-text: #111111;
+  --color-muted: #666666;
+  --color-border: #dddddd;
+  --color-accent: #1f4fff;
+
+  --font-sans: "Geist Variable", system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.5rem;
+  --text-xl: 2.25rem;
+  --text-hero: clamp(3rem, 8vw, 7rem);
+
+  --leading-none: 0.85;
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.8;
+
+  --tracking-tighter: -0.06em;
+  --tracking-tight: -0.045em;
+  --tracking-normal: -0.03em;
+  --tracking-wide: 0.15em;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --space-section: clamp(4rem, 2vw, 9rem);
+  --space-container: clamp(1rem, 4vw, 4rem);
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+
+  --container-max: 80rem;
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #0c0c0d;
+  --color-surface: #161618;
+  --color-text: #f4f4f5;
+  --color-muted: #a1a1aa;
+  --color-border: #2a2a2e;
+  --color-accent: #5b7cff;
+}

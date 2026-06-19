@@ -1,0 +1,60 @@
+---
+import "@fontsource-variable/geist/wght.css";
+import "@fontsource-variable/geist-mono/wght.css";
+import "@styles/global.css";
+import { ViewTransitions } from "astro:transitions";
+import geistSans from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
+import PageShell from "@layout/PageShell.astro";
+import { resolveSeo, type SeoInput } from "@lib/seo";
+import { OG_IMAGE } from "@lib/constants";
+import { config } from "@config";
+
+interface Props {
+  seo?: SeoInput;
+}
+
+const { seo: seoInput } = Astro.props;
+const seo = resolveSeo({ ...seoInput, path: seoInput?.path ?? Astro.url.pathname }, Astro.site);
+---
+
+<!doctype html>
+<html lang="en" data-smooth-scroll={config.motion.smoothScroll ? "true" : "false"}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="preload" href={geistSans} as="font" type="font/woff2" crossorigin />
+    <ViewTransitions />
+
+    <title>{seo.title}</title>
+    <meta name="description" content={seo.description} />
+    <link rel="canonical" href={seo.canonical} />
+    {seo.noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta property="og:type" content={seo.type} />
+    <meta property="og:site_name" content={seo.siteName} />
+    <meta property="og:title" content={seo.title} />
+    <meta property="og:description" content={seo.description} />
+    <meta property="og:url" content={seo.canonical} />
+    <meta property="og:image" content={seo.image} />
+    <meta property="og:image:width" content={String(OG_IMAGE.width)} />
+    <meta property="og:image:height" content={String(OG_IMAGE.height)} />
+    <meta property="og:locale" content={seo.locale} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={seo.title} />
+    <meta name="twitter:description" content={seo.description} />
+    <meta name="twitter:image" content={seo.image} />
+    {seo.twitter && <meta name="twitter:site" content={seo.twitter} />}
+
+    <slot name="head" />
+  </head>
+
+  <body class="flex min-h-dvh flex-col">
+    <PageShell>
+      <slot />
+    </PageShell>
+  </body>
+</html>

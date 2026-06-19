@@ -1,0 +1,58 @@
+---
+import Section from "@ui/Section.astro";
+import Heading from "@ui/Heading.astro";
+import Text from "@ui/Text.astro";
+import Button from "@ui/Button.astro";
+
+interface Cta {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  primaryCta?: Cta;
+  secondaryCta?: Cta;
+}
+
+const { eyebrow, title, subtitle, primaryCta, secondaryCta } = Astro.props;
+---
+
+<Section tag="section" width="narrow" class="text-center">
+  {
+    eyebrow && (
+      <Text tone="muted" size="sm" align="center" class="uppercase tracking-widest">
+        {eyebrow}
+      </Text>
+    )
+  }
+
+  <Heading level={1} size="hero" align="center" class="mt-4">{title}</Heading>
+
+  {
+    subtitle && (
+      <Text size="md" tone="muted" align="center" class="mx-auto mt-6 max-w-2xl">
+        {subtitle}
+      </Text>
+    )
+  }
+
+  {
+    (primaryCta || secondaryCta) && (
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+        {primaryCta && (
+          <Button href={primaryCta.href} variant="primary" size="lg">
+            {primaryCta.label}
+          </Button>
+        )}
+        {secondaryCta && (
+          <Button href={secondaryCta.href} variant="secondary" size="lg">
+            {secondaryCta.label}
+          </Button>
+        )}
+      </div>
+    )
+  }
+</Section>

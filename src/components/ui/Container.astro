@@ -1,0 +1,21 @@
+---
+import { cn } from "@lib/cn";
+
+interface Props {
+  tag?: keyof HTMLElementTagNameMap;
+  width?: "default" | "narrow" | "full";
+  class?: string;
+}
+
+const { tag: Tag = "div", width = "default", class: className } = Astro.props;
+
+const widths = {
+  default: "max-w-[var(--container-max)]",
+  narrow: "max-w-3xl",
+  full: "max-w-none",
+};
+---
+
+<Tag class={cn("mx-auto w-full px-container", widths[width], className)}>
+  <slot />
+</Tag>

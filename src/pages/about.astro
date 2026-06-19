@@ -1,0 +1,19 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Section from "@ui/Section.astro";
+import Heading from "@ui/Heading.astro";
+import Text from "@ui/Text.astro";
+import FeatureGrid from "@sections/FeatureGrid.astro";
+import CTA from "@sections/CTA.astro";
+import { company } from "@content/company";
+---
+
+<BaseLayout seo={{ title: "About", description: company.about.lead }}>
+  <Section width="full" class="text-center">
+    <Heading level={1} size="xl" align="center">{company.about.title}</Heading>
+    <Text size="md" tone="muted" align="center" class="mx-auto mt-6 max-w-2xl">
+      {company.about.lead}
+    </Text>
+  </Section>
+
+</BaseLayout>

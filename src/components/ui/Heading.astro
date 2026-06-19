@@ -1,0 +1,75 @@
+---
+import { cn } from "@lib/cn";
+
+interface Props {
+  level?: 1 | 2 | 3 | 4 | 5 | 6;
+  size?: "sm" | "base" | "md" | "lg" | "xl" | "hero";
+  weight?: "normal" | "medium" | "semibold" | "bold";
+  leading?: "none" | "tight" | "snug" | "normal" | "relaxed";
+  tracking?: "tighter" | "tight" | "normal" | "wide";
+  align?: "left" | "center";
+  class?: string;
+}
+
+const {
+  level = 2,
+  size,
+  weight = "semibold",
+  leading,
+  tracking = "tight",
+  align = "left",
+  class: className,
+} = Astro.props;
+
+const Tag = `h${level}` as const;
+
+const defaultSize = { 1: "xl", 2: "lg", 3: "md", 4: "base", 5: "base", 6: "sm" } as const;
+const resolved = size ?? defaultSize[level];
+
+const resolvedLeading = leading ?? (resolved === "hero" ? "none" : "tight");
+
+const sizes = {
+  sm: "text-sm",
+  base: "text-base",
+  md: "text-md",
+  lg: "text-lg",
+  xl: "text-xl",
+  hero: "text-hero",
+};
+
+const weights = {
+  normal: "font-normal",
+  medium: "font-medium",
+  semibold: "font-semibold",
+  bold: "font-bold",
+};
+
+const leadings = {
+  none: "leading-none",
+  tight: "leading-tight",
+  snug: "leading-snug",
+  normal: "leading-normal",
+  relaxed: "leading-relaxed",
+};
+
+const trackings = {
+  tighter: "tracking-tighter",
+  tight: "tracking-tight",
+  normal: "tracking-normal",
+  wide: "tracking-wide",
+};
+---
+
+<Tag
+  class={cn(
+    "font-sans text-balance",
+    sizes[resolved],
+    weights[weight],
+    leadings[resolvedLeading],
+    trackings[tracking],
+    align === "center" && "text-center",
+    className,
+  )}
+>
+  <slot />
+</Tag>

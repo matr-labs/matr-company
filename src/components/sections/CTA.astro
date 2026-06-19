@@ -1,0 +1,28 @@
+---
+import Section from "@ui/Section.astro";
+import Heading from "@ui/Heading.astro";
+import Text from "@ui/Text.astro";
+import Button from "@ui/Button.astro";
+
+interface Props {
+  title: string;
+  body?: string;
+  action: { label: string; href: string };
+}
+
+const { title, body, action } = Astro.props;
+---
+
+<Section tone="accent" width="narrow" class="text-center">
+  <Heading level={2} size="xl" align="center">{title}</Heading>
+  {
+    body && (
+      <Text align="center" size="md" class="mx-auto mt-4 max-w-xl opacity-90">
+        {body}
+      </Text>
+    )
+  }
+  <div class="mt-8 flex justify-center">
+    <Button href={action.href} variant="secondary" size="lg">{action.label}</Button>
+  </div>
+</Section>
