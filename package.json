@@ -21,6 +21,7 @@
     "@fontsource-variable/geist-mono": "^5.2.8",
     "astro": "^4.16.18",
     "clsx": "^2.1.1",
+    "gsap": "^3.15.0",
     "tailwind-merge": "^2.6.0",
     "three": "^0.170.0",
     "typescript": "^5.7.3"

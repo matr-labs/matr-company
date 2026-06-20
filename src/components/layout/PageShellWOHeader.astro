@@ -1,0 +1,14 @@
+---
+// Page shell without header/footer chrome — used by BaseLayout when `bare` is set.
+---
+
+<a
+  href="#main"
+  class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:text-text focus:shadow"
+>
+  Skip to content
+</a>
+
+<main id="main" class="flex-1">
+  <slot />
+</main>

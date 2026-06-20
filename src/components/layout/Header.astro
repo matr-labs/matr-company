@@ -9,9 +9,9 @@ const isActive = (href: string) =>
   href === "/" ? path === "/" : path.startsWith(href);
 ---
 
-<header class="sticky top-0 z-50 border-b border-border bg-bg backdrop-blur">
-  <Container width="full" class="flex h-8 items-center justify-between gap-6">
-    <a href="/" class="font-sans text-md font-semibold tracking-tight">
+<header class="fixed w-full top-0 border-b border-border bg-surface z-50 ">
+  <Container width="full" class="font-sans text-md font-semibold tracking-tight flex h-8 items-center justify-between gap-6">
+    <a href="/" class="">
       {site.name}
     </a>
 
@@ -24,7 +24,7 @@ const isActive = (href: string) =>
                 href={item.href}
                 aria-current={isActive(item.href) ? "page" : undefined}
                 class={cn(
-                  "text-sm transition-colors hover:text-accent",
+                  "transition-colors hover:text-accent",
                   isActive(item.href) ? "text-text" : "text-muted",
                 )}
               >
@@ -35,5 +35,8 @@ const isActive = (href: string) =>
         }
       </ul>
     </nav>
+    <a href="/contact" class="text-muted hover:text-accent">
+      Contact us
+    </a>
   </Container>
 </header>

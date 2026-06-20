@@ -5,15 +5,19 @@ import "@styles/global.css";
 import { ViewTransitions } from "astro:transitions";
 import geistSans from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import PageShell from "@layout/PageShell.astro";
+import PageShellWOHeader from "@layout/PageShellWOHeader.astro";
 import { resolveSeo, type SeoInput } from "@lib/seo";
 import { OG_IMAGE } from "@lib/constants";
 import { config } from "@config";
 
 interface Props {
   seo?: SeoInput;
+  /** Drop the site header/footer chrome (use the bare shell). */
+  bare?: boolean;
 }
 
-const { seo: seoInput } = Astro.props;
+const { seo: seoInput, bare = false } = Astro.props;
+const Shell = bare ? PageShellWOHeader : PageShell;
 const seo = resolveSeo({ ...seoInput, path: seoInput?.path ?? Astro.url.pathname }, Astro.site);
 ---
 
@@ -52,9 +56,9 @@ const seo = resolveSeo({ ...seoInput, path: seoInput?.path ?? Astro.url.pathname
     <slot name="head" />
   </head>
 
-  <body class="flex min-h-dvh flex-col">
-    <PageShell>
+  <body class="flex min-h-dvh flex-col w-full">
+    <Shell>
       <slot />
-    </PageShell>
+    </Shell>
   </body>
 </html>

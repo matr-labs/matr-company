@@ -22,6 +22,7 @@ export default {
         md: "var(--text-md)",
         lg: "var(--text-lg)",
         xl: "var(--text-xl)",
+        "2xl": "var(--text-2xl)",
         hero: "var(--text-hero)",
       },
       lineHeight: {

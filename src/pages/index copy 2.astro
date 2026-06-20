@@ -1,0 +1,316 @@
+---
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout seo={{ title: "Home"}}>
+    <div class="container">
+      <div class="counter">
+        <p>0</p>
+      </div>
+      <section class="hero overflow-hidden">
+        <div class="content">
+         <Header class="content"/>
+        <div class="hero-img">
+          <img src="/preloader/hero-img-3.jpg" alt="" />
+        </div>
+
+        <Footer  class="content"/>
+        </div>
+          <div class="overlay"><canvas data-overlay-dither></canvas></div>
+      </section>
+    
+    </div>
+ </BaseLayout>
+
+<style is:global>
+
+  .container {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .content{opacity:0;}
+
+  .counter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 20px;
+    text-align: center;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+    z-index: 0;
+  }
+
+  .counter p {
+    position: relative;
+    display: block;
+    transform: translateY(20px);
+  }
+
+  .hero {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70vw;
+    height: 70vh;
+    clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
+    will-change: width, height;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent; /* the canvas paints the black box */
+    clip-path: polygon(0 100%, 100% 100%, 100% 0, 0 0);
+    z-index: 100;
+    pointer-events: none; /* let clicks reach the nav underneath */
+  }
+
+  .overlay canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+
+  .header {
+    position: absolute;
+    width: 100%;
+    top: -5%;
+    left: 0;
+    clip-path: polygon(0 100%, 100% 100%, 100% 0, 0 0);
+    z-index: 1;
+  }
+
+  .header h1 {
+    font-family: "Blanquotey", "Test Söhne", system-ui, sans-serif;
+    font-size: 38.5vw;
+    font-weight: lighter;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    line-height: 100%;
+  }
+
+  .header h1 span {
+    position: relative;
+    display: inline-block;
+    transform: translateY(500px);
+  }
+
+  .hero-img {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .hero-img img {
+    transform: scale(1.2);
+    opacity:0;
+  }
+
+  @media (max-width: 900px) {
+    .header {
+      top: 30%;
+    }
+
+    .hero-img {
+      height: 50vh;
+    }
+  }
+</style>
+
+<script>
+  import gsap from "gsap";
+  import { CustomEase } from "gsap/CustomEase";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    gsap.registerPlugin(CustomEase);
+    CustomEase.create(
+      "hop",
+      "M0,0 C0.29,0 0.348,0.05 0.422,0.134 0.494,0.217 0.484,0.355 0.5,0.5 0.518,0.662 0.515,0.793 0.596,0.876 0.701,0.983 0.72,0.987 1,1 ",
+    );
+
+    // ── Dithered (random-stipple) black box ───────────────────────────────────
+    // `grow` fills it bottom→top (dithered TOP edge); `rise` clears it bottom→top
+    // (dithered BOTTOM edge). Each is driven by an existing reveal tween — the
+    // grow with the hero clip, the rise with the overlay tween — same timing.
+    const PX = 1; // grain size (px)
+    const SOFT = 0.5; // height (fraction of box) of the dithered front
+    const dither = { grow: 0, rise: 0 };
+    const oCanvas = document.querySelector<HTMLCanvasElement>("[data-overlay-dither]");
+    const oCtx = oCanvas ? oCanvas.getContext("2d") : null;
+    let oCols = 0;
+    let oRows = 0;
+    let oImg: ImageData | null = null;
+    let oThr = new Float32Array(0);
+
+    function sizeDither() {
+      if (!oCanvas || !oCtx) return false;
+      const w = oCanvas.clientWidth;
+      const h = oCanvas.clientHeight;
+      if (!w || !h) return false;
+      oCols = Math.max(1, Math.ceil(w / PX));
+      oRows = Math.max(1, Math.ceil(h / PX));
+      oCanvas.width = oCols;
+      oCanvas.height = oRows;
+      oImg = oCtx.createImageData(oCols, oRows);
+      oThr = new Float32Array(oCols * oRows);
+      for (let i = 0; i < oThr.length; i++) oThr[i] = Math.random();
+      return true;
+    }
+
+    function renderDither() {
+      if ((!oImg && !sizeDither()) || !oImg || !oCtx) return;
+      const data = oImg.data;
+      const denom = oRows > 1 ? oRows - 1 : 1;
+      const bandTop = (1 + SOFT) * (1 - dither.grow); // top edge sweeps up (grow)
+      const bandBottom = 1 - dither.rise * (1 + SOFT); // bottom edge sweeps up (rise)
+      for (let y = 0; y < oRows; y++) {
+        const yN = y / denom;
+        const covTop = Math.min(1, Math.max(0, (yN - (bandTop - SOFT)) / SOFT));
+        const covBottom = Math.min(1, Math.max(0, (bandBottom + SOFT - yN) / SOFT));
+        const cov = Math.min(covTop, covBottom);
+        for (let x = 0; x < oCols; x++) {
+          const idx = y * oCols + x;
+          const i = idx * 4;
+          data[i] = 0;
+          data[i + 1] = 0;
+          data[i + 2] = 0;
+          data[i + 3] = cov > oThr[idx] ? 255 : 0; // black dot or transparent
+        }
+      }
+      oCtx.putImageData(oImg, 0, 0);
+    }
+
+    sizeDither();
+    renderDither();
+    window.addEventListener("resize", () => {
+      if (sizeDither()) renderDither();
+    });
+
+    function splitTextIntoSpans(selector: string) {
+      document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
+        element.innerHTML = element.innerText
+          .split("")
+          .map((char) => `<span>${char === " " ? "&nbsp;&nbsp;" : char}</span>`)
+          .join("");
+      });
+    }
+    splitTextIntoSpans(".header h1");
+
+    function animateCounter() {
+      const counterElement = document.querySelector<HTMLElement>(".counter p");
+      if (!counterElement) return;
+      let currentValue = 0;
+      const updateInterval = 300;
+      const maxDuration = 2000;
+      const endValue = 100;
+      const startTime = Date.now();
+
+      const updateCounter = () => {
+        const elapsedTime = Date.now() - startTime;
+        if (elapsedTime < maxDuration) {
+          currentValue = Math.min(
+            currentValue + Math.floor(Math.random() * 30) + 5,
+            endValue,
+          );
+          counterElement.textContent = String(currentValue);
+          setTimeout(updateCounter, updateInterval);
+        } else {
+          counterElement.textContent = String(endValue);
+          gsap.to(counterElement, {
+            y: -20,
+            duration: 1,
+            ease: "power3.inOut",
+            onStart: () => {
+              revealLandingPage();
+            },
+          });
+        }
+      };
+
+      updateCounter();
+    }
+
+    gsap.to(".counter p", {
+      y: 0,
+      duration: 1,
+      ease: "power3.out",
+      delay: 1,
+      onComplete: () => {
+        animateCounter();
+      },
+    });
+
+    const revealLandingPage = () => {
+      gsap.to(".hero", {
+        clipPath: "polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)",
+        duration: 1,
+        ease: "ease",
+        onStart: () => {
+          // Black box grows in from the bottom (dithered TOP edge), synced to
+          // the hero clip reveal (same 2s / hop).
+
+          gsap.to(dither, {
+            grow: 1,
+            duration: 2,
+            ease: "ease",
+            onUpdate: renderDither,
+          });
+          
+
+          gsap.to(".hero", {
+            width: "100vw",
+            height: "100vh",
+            duration: 2.25,
+            ease: "power3.inOut",
+            delay: 1,
+          });
+
+          gsap.to(".content", {
+            opacity:1,
+            display:"block",
+          },">");
+
+          gsap.to(".hero-img img", {
+            transform: "scale(1)",
+            duration: 2.25,
+            ease: "power3.inOut",
+            opacity:1,
+            delay: 0.5,
+          });
+
+               gsap.to(".overlay", {
+            clipPath: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)",
+            duration: 2,
+            delay: 1,
+            ease: "hop",
+          },"<");     
+
+          // gsap.to(".header h1 span", {
+          //   y: 0,
+          //   stagger: 0.1,
+          //   duration: 2,
+          //   ease: "power4.inOut",
+          //   delay: 0.75,
+          // });
+        },
+      });
+    };
+  });
+</script>
