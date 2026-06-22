@@ -8,11 +8,9 @@ interface Props {
 
 const { src, class: className } = Astro.props;
 ---
-
 <div data-signature data-src={src} class={cn("relative h-full w-full", className)}>
   <canvas data-stage class="absolute inset-0 h-full w-full"></canvas>
 
-  {/* ── Control panel ──────────────────────────────────────────────── */}
   <div
     data-panel
     class="absolute right-3 top-3 z-20 w-48 select-none rounded-md border border-border bg-surface/90 p-3 font-mono text-xs text-text shadow-lg backdrop-blur"
@@ -65,16 +63,12 @@ const { src, class: className } = Astro.props;
 </style>
 
 <script>
-  // ── Signature animation: water-ripple distortion ──────────────────────
-  // A ping-pong wave simulation: the cursor injects "pressure" that
-  // propagates like ripples on water; a render pass refracts the image by the
-  // wave gradient and adds a thin specular highlight. Adapted from the
-  // cg-gentlerain reference (Three.js + GLSL), running over the image.
+
   import * as THREE from "three";
 
   const reduce = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const simVertex = /* glsl */ `
+  const simVertex =  `
     varying vec2 vUv;
     void main() {
       vUv = uv;
@@ -82,7 +76,7 @@ const { src, class: className } = Astro.props;
     }
   `;
 
-  const simFragment = /* glsl */ `
+  const simFragment =  `
     uniform sampler2D textureA;
     uniform vec2 mouse;
     uniform vec2 resolution;
@@ -132,7 +126,7 @@ const { src, class: className } = Astro.props;
     }
   `;
 
-  const renderFragment = /* glsl */ `
+  const renderFragment =  `
     uniform sampler2D textureA;  // wave state
     uniform sampler2D textureB;  // image
     uniform vec2 uImgScale;      // cover-fit
@@ -198,9 +192,9 @@ const { src, class: className } = Astro.props;
         textureA: { value: null },
         mouse: { value: mouse },
         resolution: { value: new THREE.Vector2(1, 1) },
-        uStrength: { value: 0.3 }, // very subtle by default
-        uRadius: { value: 0.11 }, // large, feathered ripple
-        uDamping: { value: 0.93 }, // ripples settle quickly
+        uStrength: { value: 0.3 },
+        uRadius: { value: 0.11 },
+        uDamping: { value: 0.93 },
         frame: { value: 0 },
       },
       vertexShader: simVertex,
@@ -254,7 +248,7 @@ const { src, class: className } = Astro.props;
       rtA.setSize(pw, ph);
       rtB.setSize(pw, ph);
       simMaterial.uniforms.resolution.value.set(pw, ph);
-      frame = 0; // reset the simulation for the new buffer size
+      frame = 0;
       updateCover();
     }
 
@@ -271,7 +265,7 @@ const { src, class: className } = Astro.props;
     });
 
     function renderFrameOnce() {
-      // Render the current wave state (or a flat image when frame is reset).
+
       renderMaterial.uniforms.textureA.value = rtA.texture;
       renderer.setRenderTarget(null);
       renderer.render(scene, camera);
@@ -300,7 +294,7 @@ const { src, class: className } = Astro.props;
       if (!ready) return;
       if (reduce()) {
         frame = 0;
-        renderFrameOnce(); // static image, no ripples
+        renderFrameOnce();
         return;
       }
       running = true;
@@ -312,11 +306,10 @@ const { src, class: className } = Astro.props;
       cancelAnimationFrame(raf);
     }
 
-    // ── Interaction ───────────────────────────────────────────────────────
     canvas.addEventListener("pointermove", (e) => {
       const r = canvas.getBoundingClientRect();
       mouse.x = (e.clientX - r.left) * dpr;
-      mouse.y = (r.height - (e.clientY - r.top)) * dpr; // flip Y for GL space
+      mouse.y = (r.height - (e.clientY - r.top)) * dpr;
     });
     canvas.addEventListener("pointerleave", () => mouse.set(0, 0));
 
@@ -334,7 +327,6 @@ const { src, class: className } = Astro.props;
     );
     io.observe(canvas);
 
-    // ── Panel ─────────────────────────────────────────────────────────────
     root.querySelectorAll<HTMLInputElement>("[data-param]").forEach((inp) =>
       inp.addEventListener("input", () => {
         const key = inp.dataset.param;

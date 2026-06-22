@@ -1,7 +1,5 @@
 ---
-// Full-screen Zajno intro overlay, rendered by BaseLayout so it covers the whole
-// page. Same animation as before; styles are component-scoped so nothing leaks
-// to the site behind it.
+
 import ImageBlock from "@ui/ImageBlock.astro";
 import placeholder from "@assets/images/test-large.jpg";
 ---
@@ -35,8 +33,7 @@ import placeholder from "@assets/images/test-large.jpg";
 </div>
 
 <style>
-  /* Full-screen overlay on top of everything. Scoped — img/p/a rules only hit
-     the preloader's own elements, not the site behind it. */
+  
   .preloader {
     position: fixed;
     inset: 0;
@@ -113,7 +110,7 @@ import placeholder from "@assets/images/test-large.jpg";
     width: 100%;
     overflow: hidden;
     z-index: 0;
-    transform: scale(1.25); /* base zoom from the matr hero */
+    transform: scale(1.25); 
     transform-origin: center;
   }
 

@@ -1,89 +1,93 @@
 ---
-// Services — full-width panels with big typography. Each service header is
-// sticky and stacks into a staircase as you scroll; the big placeholder images
-// scroll behind the pinned headers, and the whole stack releases once you've
-// scrolled past the section (pure-CSS sticky, bounded by the section).
-// Typography comes entirely from the Heading/Text design-system components.
+
+import Section from "@ui/Section.astro";
 import ImageBlock from "@ui/ImageBlock.astro";
 import Heading from "@ui/Heading.astro";
 import Text from "@ui/Text.astro";
-import { servicesWithNo, servicesIntro } from "@content/services";
-import placeholder from "@assets/images/test-large.jpg";
+
+import { home, servicesWithNo } from "@content/home";
+const { services } = home;
 ---
 
-<section class="svcs" aria-label={servicesIntro.label}>
-  <div class="svcs__intro">
-    <Heading level={2} size="lg">{servicesIntro.title}</Heading>
+
+<Section id="services" tone="surface" width="full" contained={false}>
+  
+  <div class="svcs">
+    <div class="svcs__intro">
+      <Heading level={2} size="lg">{services.title}</Heading>
+    </div>
+
+    {
+      servicesWithNo.map((service) => (
+        // Each panel is the sticky header's containing block, so the header
+        // releases (scrolls up + out) once you scroll past its media.
+        <article class="svc-panel">
+          <header class="svc-head">
+            <Text tag="span" size="sm" tone="muted" class="flex-none font-mono">
+              {service.no}
+            </Text>
+
+            <Heading level={1} size="2xl">
+              {service.title}
+            </Heading>
+
+            <Heading
+              level={2}
+              class="ml-auto max-w-[38ch] max-md:max-w-none max-md:text-sm"
+            >
+              {service.description}
+            </Heading>
+          </header>
+
+          <div class="svc-media">
+            <ImageBlock
+              src={service.image}
+              alt={service.title}
+              sizes="100vw"
+              class="svc-media__img"
+            />
+          </div>
+        </article>
+      ))
+    }
   </div>
-
-  {
-    servicesWithNo.map((service, i) => (
-      <Fragment>
-        <header class="svc-head" style={`--i:${i}`}>
-          <Text tag="span" size="sm" tone="muted" class="flex-none font-mono">
-            {service.no}
-          </Text>
-
-          <Heading
-            level={1}
-            size="2xl"
-          >
-            {service.title}
-          </Heading>
-
-
-   <Heading
-           level={2}  class="ml-auto max-w-[38ch] max-md:max-w-none max-md:text-sm"
-          >
-
-            {service.description}
-          </Heading>
-        </header>
-
-        <div class="svc-media" style={`--i:${i}`}>
-          <ImageBlock
-            src={placeholder}
-            alt={`${service.title} — placeholder`}
-            sizes="100vw"
-            class="svc-media__img"
-          />
-        </div>
-      </Fragment>
-    ))
-  }
-</section>
+</Section>
 
 <style>
   .svcs {
-    /* pin point sits flush under the fixed 2rem nav; step = pinned header height */
+
     --stack-top: 2rem;
-    --stack-step: 7.5rem;
+    --head-h: 7.5rem;
     position: relative;
-    background: var(--color-bg);
-    color: var(--color-text);
+
   }
 
   .svcs__intro {
-    padding: var(--space-section) var(--space-container) 2rem;
+    padding: 0 var(--space-container) 2rem;
   }
 
-  /* ── Stacking headers (layout only — type is from Heading/Text) ──────────── */
+  
+  .svc-panel {
+    position: relative;
+  }
+
+  
   .svc-head {
     position: sticky;
-    top: calc(var(--stack-top) + var(--i) * var(--stack-step));
-    z-index: calc(1 + var(--i));
+    top: var(--stack-top);
+    z-index: 2; 
     display: flex;
     align-items: top;
     gap: clamp(1rem, 3vw, 3rem);
     width: 100%;
-    height: var(--stack-step); /* fixed → clean, non-overlapping staircase */
+    height: var(--head-h);
     overflow: hidden;
     padding: 0 var(--space-container);
-    background: var(--color-bg);
+    background: var(--color-surface); 
     border-top: 1px solid var(--color-border);
   }
 
-  /* ── Big media, scrolls behind the pinned headers ───────────────────────── */
+  
   .svc-media {
     position: relative;
     z-index: 0;
@@ -96,7 +100,7 @@ import placeholder from "@assets/images/test-large.jpg";
     object-fit: cover;
   }
 
-  /* Mobile: drop the stacking — headers flow normally, description below. */
+  
   @media (max-width: 768px) {
     .svc-head {
       position: static;

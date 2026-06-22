@@ -1,0 +1,240 @@
+{
+  "hero": {
+    "image": "/images/home/hero.jpg",
+    "imageAlt": "",
+    "brand": "Matr labs"
+  },
+
+  "intro": {
+    "heading": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet.",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque nulla tellus, tristique id pretium a, dictum et lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce eu nunc justo. Vestibulum feugiat sollicitudin euismod. Duis et augue bibendum, commodo dui vitae, varius felis. Proin finibus, purus pretium pretium vulputate, mi eros molestie purus, nec laoreet lacus magna sed sem. Integer vulputate mauris quis arcu lobortis pretium."
+  },
+
+  "work": {
+    "label": "Selected Work",
+    "title": "Lorem ipsum dolor sit amet.",
+    "items": [
+      {
+        "title": "Lorem Ipsum",
+        "category": "Lorem / Ipsum",
+        "year": "2026",
+        "href": "/contact",
+        "image": "/images/home/work-lorem-ipsum.jpg"
+      },
+      {
+        "title": "Dolor Sit",
+        "category": "Dolor / Amet",
+        "year": "2026",
+        "href": "/contact",
+        "image": "/images/home/work-dolor-sit.jpg"
+      },
+      {
+        "title": "Consectetur",
+        "category": "Adipiscing / Elit",
+        "year": "2025",
+        "href": "/contact",
+        "image": "/images/home/work-consectetur.jpg"
+      },
+      {
+        "title": "Tempor Labore",
+        "category": "Eiusmod / Incididunt",
+        "year": "2025",
+        "href": "/contact",
+        "image": "/images/home/work-tempor-labore.jpg"
+      }
+    ]
+  },
+
+  "industries": {
+    "label": "Recognized by",
+    "title": "Industry evaluation",
+    "items": [
+      {
+        "name": "Christie's",
+        "logo": "/images/logos/christies.svg",
+        "href": ""
+      },
+      {
+        "name": "PACE Gallery",
+        "logo": "/images/logos/pace-gallery.svg",
+        "href": ""
+      },
+      { "name": "Whitney", "logo": "/images/logos/whitney.png", "href": "" },
+      { "name": "Sotheby's", "logo": "/images/logos/sothebys.svg", "href": "" },
+      { "name": "Artnet", "logo": "/images/logos/artnet.svg", "href": "" },
+      { "name": "Vice", "logo": "/images/logos/vice.svg", "href": "" },
+      { "name": "Every.to", "logo": "/images/logos/every-to.svg", "href": "" },
+      {
+        "name": "NFT Collective",
+        "logo": "/images/logos/nft-collective.svg",
+        "href": ""
+      }
+    ]
+  },
+
+  "artists": {
+    "label": "Clients & partners",
+    "title": "Artists we work with",
+    "items": [
+      {
+        "name": "Alpha Centauri Kid",
+        "image": "/images/artists/alpha-centauri-kid.jpg",
+        "href": ""
+      },
+      {
+        "name": "Ayla el-Moussa",
+        "image": "/images/artists/ayla-el-moussa.jpg",
+        "href": ""
+      },
+      {
+        "name": "ClownVamp",
+        "image": "/images/artists/clownvamp.jpg",
+        "href": ""
+      },
+      {
+        "name": "Danny Cole",
+        "image": "/images/artists/danny-cole.jpg",
+        "href": ""
+      },
+      {
+        "name": "Erick Calderon",
+        "image": "/images/artists/erick-calderon.jpg",
+        "href": ""
+      },
+      {
+        "name": "Gretchen Andrew",
+        "image": "/images/artists/gretchen-andrew.jpg",
+        "href": ""
+      },
+      {
+        "name": "Henry Daubrez",
+        "image": "/images/artists/henry-daubrez.jpg",
+        "href": ""
+      },
+      {
+        "name": "Ira Greenberg",
+        "image": "/images/artists/ira-greenberg.jpg",
+        "href": ""
+      },
+      {
+        "name": "Jenni Pasanen",
+        "image": "/images/artists/jenni-pasanen.jpg",
+        "href": ""
+      },
+      {
+        "name": "Justin Aversano",
+        "image": "/images/artists/justin-aversano.jpg",
+        "href": ""
+      },
+      {
+        "name": "Kenny Schachter",
+        "image": "/images/artists/kenny-schachter.jpg",
+        "href": ""
+      },
+      {
+        "name": "Kevin Esherick",
+        "image": "/images/artists/kevin-esherick.jpg",
+        "href": ""
+      },
+      {
+        "name": "Kirill Semenovich",
+        "image": "/images/artists/kirill-semenovich.jpg",
+        "href": ""
+      },
+      {
+        "name": "Lars Wander",
+        "image": "/images/artists/lars-wander.jpg",
+        "href": ""
+      },
+      {
+        "name": "Lilyillo",
+        "image": "/images/artists/lilyillo.jpg",
+        "href": ""
+      },
+      {
+        "name": "Maria Kreyn",
+        "image": "/images/artists/maria-kreyn.jpg",
+        "href": ""
+      },
+      {
+        "name": "Matthew Richie",
+        "image": "/images/artists/matthew-richie.jpg",
+        "href": ""
+      },
+      {
+        "name": "Matthew Stone",
+        "image": "/images/artists/matthew-stone.jpg",
+        "href": ""
+      },
+      {
+        "name": "Tyler Hobbs",
+        "image": "/images/artists/tyler-hobbs.jpg",
+        "href": ""
+      },
+      { "name": "Zancan", "image": "/images/artists/zancan.jpg", "href": "" },
+      {
+        "name": "Jeff Koons",
+        "image": "/images/artists/jeff-koons.jpg",
+        "href": ""
+      },
+      { "name": "Beeple", "image": "/images/artists/beeple.jpg", "href": "" },
+      { "name": "Nir Hod", "image": "/images/artists/nir-hod.jpg", "href": "" },
+      {
+        "name": "Dustin Yellin",
+        "image": "/images/artists/dustin-yellin.jpg",
+        "href": ""
+      },
+      {
+        "name": "Barnaby Furnas",
+        "image": "/images/artists/barnaby-furnas.jpg",
+        "href": ""
+      },
+      {
+        "name": "Chuck Close",
+        "image": "/images/artists/chuck-close.jpg",
+        "href": ""
+      },
+      {
+        "name": "Ross Bleckner",
+        "image": "/images/artists/ross-bleckner.jpg",
+        "href": ""
+      },
+      {
+        "name": "Matthew Day Jackson",
+        "image": "/images/artists/matthew-day-jackson.jpg",
+        "href": ""
+      },
+      {
+        "name": "Eric Fischl",
+        "image": "/images/artists/eric-fischl.jpg",
+        "href": ""
+      },
+      {
+        "name": "Artur Jafa",
+        "image": "/images/artists/artur-jafa.jpg",
+        "href": ""
+      }
+    ]
+  },
+  "services": {
+    "label": "What we do",
+    "title": "Services",
+    "items": [
+      {
+        "title": "Technology.",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "image": "/images/home/service-technology.jpg"
+      },
+      {
+        "title": "Production.",
+        "description": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+        "image": "/images/home/service-production.jpg"
+      },
+      {
+        "title": "Collaboration.",
+        "description": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+        "image": "/images/home/service-collaboration.jpg"
+      }
+    ]
+  }
+}

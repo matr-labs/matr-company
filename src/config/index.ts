@@ -3,10 +3,9 @@ export const config = {
     smoothScroll: true,
   },
   preloader: {
-    // Master switch for the intro preloader overlay.
+
     enabled: true,
-    // "always"  → play on every page load (handy while iterating)
-    // "session" → play once per tab session, then skip on reloads/navigation
+
     replay: "always" as "always" | "session",
   },
   image: {

@@ -1,0 +1,96 @@
+---
+import Section from "@ui/Section.astro";
+import Container from "@ui/Container.astro";
+import Heading from "@ui/Heading.astro";
+import ImageBlock from "@ui/ImageBlock.astro";
+import { home } from "@content/home";
+const { artists } = home;
+---
+<Section id="artists" width="full" tone="surface">
+  <Container width="full">
+
+    <div class="md:grid md:grid-cols-2 md:items-start md:gap-x-8">
+      <div class="md:sticky md:top-8 md:z-20 md:self-start">
+
+        <div class="artists__banner h-96 w-full overflow-hidden rounded-lg md:w-[calc(200%_+_2rem)]">
+          <ImageBlock src="" alt="" class="artists__banner-img h-full w-full" />
+        </div>
+        <Heading level={1} class="mt-8">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque
+          nulla tellus, tristique id pretium a, dictum et lorem.
+        </Heading>
+      </div>
+
+      <ul class="mt-8 flex flex-col md:mt-[26rem] ">
+        {
+          artists.items.map((artist) => (
+            <li class="group">
+              <a href={artist.href || "/contact"} class="block">
+                <Heading level={2} class="artists__name">
+                  {artist.name}
+                </Heading>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Container>
+</Section>
+
+<script>
+  import gsap from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let ctx: gsap.Context | undefined;
+
+  function build() {
+    ctx?.revert();
+
+    const section = document.querySelector<HTMLElement>("#artists");
+    if (!section) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
+    ctx = gsap.context(() => {
+
+      gsap.fromTo(
+        ".artists__banner-img",
+        { yPercent: -10, scale: 1.2 },
+        {
+          yPercent: 10,
+          scale: 1.2,
+          ease: "none",
+          scrollTrigger: {
+            trigger: "#artists",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        },
+      );
+
+      gsap.set(".artists__name", { autoAlpha: 0, y: 28 });
+      ScrollTrigger.batch(".artists__name", {
+        start: "top 88%",
+        onEnter: (els) =>
+          gsap.to(els, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.5,
+            ease: "power2.out",
+            stagger: 0.08,
+            overwrite: true,
+          }),
+        onLeaveBack: (els) =>
+          gsap.to(els, { autoAlpha: 0, y: 28, stagger: 0.05, overwrite: true }),
+      });
+    }, section);
+  }
+
+  build();
+  document.addEventListener("astro:page-load", build);
+</script>

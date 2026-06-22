@@ -11,6 +11,8 @@ interface Props {
   format?: "webp" | "avif" | "png" | "jpg";
   sizes?: string;
   rounded?: boolean;
+  
+  fallback?: string;
   class?: string;
 }
 
@@ -23,11 +25,16 @@ const {
   format = "webp",
   sizes,
   rounded = false,
+  fallback = "/images/placeholder.svg",
   class: className,
 } = Astro.props;
 
 const classes = cn("h-auto w-full object-cover", rounded && "rounded-lg", className);
 const decoding = loading === "eager" ? "sync" : "async";
+
+const TRANSPARENT_PIXEL =
+  "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+const onError = `this.onerror=null;this.src='${TRANSPARENT_PIXEL}';this.classList.add('is-placeholder');`;
 ---
 
 {
@@ -41,6 +48,8 @@ const decoding = loading === "eager" ? "sync" : "async";
       decoding={decoding}
       sizes={sizes}
       class={classes}
+      style={`--img-fallback:url('${fallback}')`}
+      onerror={onError}
     />
   ) : (
     <Image
@@ -56,3 +65,17 @@ const decoding = loading === "eager" ? "sync" : "async";
     />
   )
 }
+
+<style>
+  
+  .is-placeholder {
+    background-color: #e7e5e4;
+    background-image: var(--img-fallback);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: clamp(1.5rem, 28%, 4rem);
+    
+    min-width: 3rem;
+    min-height: 3rem;
+  }
+</style>

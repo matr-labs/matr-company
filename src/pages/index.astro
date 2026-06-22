@@ -4,31 +4,26 @@ import Container from "@ui/Container.astro";
 import Section from "@ui/Section.astro";
 import Heading from "@ui/Heading.astro";
 import Text from "@ui/Text.astro";
-import Button from "@ui/Button.astro";
 import ImageBlock from "@ui/ImageBlock.astro";
-import CTA from "@sections/CTA.astro";
+import Artists from "@sections/Artists.astro";
 import Services from "@sections/Services.astro";
 import { home } from "@content/home";
-import { site } from "@content/site";
-// Single local placeholder asset reused across the work tiles.
-import placeholder from "@assets/images/test-large.jpg";
 import H3 from "@ui/Heading.astro";
-const { hero, manifesto, work, stats, cta } = home;
+
+const { hero, intro, industries } = home;
 ---
 
 <BaseLayout seo={{ title: "Home", titleAbsolute: true }}>
-  {/* ── Hero ─────────────────────────────────────────────────────────────
-       Minimalist: the wordmark carries it. Height by 3 levels:
-       mobile 88svh · sm 90svh · lg+ 100svh (always full).             */}
+
   <section
     data-theme="dark"
     class="sticky top-8 z-0 h-[88svh] overflow-hidden bg-bg text-text sm:h-[90svh] lg:h-svh"
   >
   <div class="hero-parallax absolute inset-0 will-change-transform">
-    {/* placeholder reel image + scrim for legibility */}
+    
     <ImageBlock
-      src={placeholder}
-      alt=""
+      src={hero.image}
+      alt={hero.imageAlt}
       loading="eager"
       sizes="100vw"
       class="hero-img absolute inset-0 h-full w-full will-change-transform"
@@ -48,75 +43,67 @@ const { hero, manifesto, work, stats, cta } = home;
 
   </section>
 
-  {/* Everything below scrolls up over the pinned hero. */}
+  
   <div class="relative z-10">
      <div class="text-white flex justify-center w-full absolute flex-col -top-[88vh] text-center gap-[60vh]">
-          <div>
-        Lorem ipsum dolor sit amet,<br/>consectetur adipiscing elit. <br/>Pellentesque nulla tellus,<br/> tristique id pretium a, <br/>dictum et lorem.
-      </div>
-    <H3>Matr labs</H3>
+    <H3>{hero.brand}</H3>
     </div>
   <Section width="full" tone="surface">
     <Container width="full" class="relative flex flex-1 flex-col justify-end gap-12">
-      {/* wordmark */}
+      
       <div class="hero-rise flex flex-col gap-6">
         <Heading level={1} size="hero" tracking="tighter">
-         Neque porro quisquam est qui dolorem ipsum quia dolor sit amet.
+         {intro.heading}
         </Heading>
-        <H3>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque nulla tellus, tristique id pretium a, dictum et lorem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce eu nunc justo. Vestibulum feugiat sollicitudin euismod. Duis et augue bibendum, commodo dui vitae, varius felis. Proin finibus, purus pretium pretium vulputate, mi eros molestie purus, nec laoreet lacus magna sed sem. Integer vulputate mauris quis arcu lobortis pretium.</H3>
+        <H3>{intro.body}</H3>
       </div>
+
+
+      
+
+<ul class="grid grid-cols-4 gap-6 sm:gap-8 lg:gap-16 overflow-hidden lg:grid-cols-8 mt-8">
+    {
+      industries.items.map((item) => (
+        <li class="flex aspect-[2/1] items-center justify-center bg-surface ">
+          {item.href ? (
+            <a
+              href={item.href}
+              class="flex h-full w-full items-center justify-center opacity-50 transition-opacity hover:opacity-100"
+              aria-label={item.name}
+            >
+              <ImageBlock
+                src={item.logo}
+                alt={item.name}
+                class="max-h-12 w-auto object-contain grayscale"
+              />
+            </a>
+          ) : (
+            <ImageBlock
+              src={item.logo}
+              alt={item.name}
+              class="max-h-12 w-auto object-contain opacity-50 grayscale"
+            />
+          )}
+        </li>
+      ))
+    }
+  </ul>
+
     </Container>
 
-
-  </Section>
-  {/* ── Selected work ──────────────────────────────────────────────────── */}
-  <Section id="work" width="default">
-    <div class="mb-10 flex flex-wrap items-end justify-between gap-6">
-      <div>
-        <Text size="sm" tone="muted" class="font-mono uppercase tracking-wide">
-          {work.label}
-        </Text>
-        <Heading level={2} size="xl" class="mt-3">{work.title}</Heading>
-      </div>
-    </div>
-
-    <ul class="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2">
-      {
-        work.items.map((item) => (
-          <li class="work-card group">
-            <a href="/contact" class="block">
-              <div class="overflow-hidden rounded-lg bg-surface">
-                <ImageBlock
-                  src={placeholder}
-                  alt={`${item.title} — placeholder image`}
-                  sizes="(min-width: 640px) 50vw, 100vw"
-                  class="aspect-[4/3] h-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                />
-              </div>
-              <div class="mt-4 flex items-baseline justify-between gap-4">
-                <Heading level={3} size="md">{item.title}</Heading>
-                <Text size="sm" tone="muted" class="font-mono">
-                  {item.year}
-                </Text>
-              </div>
-              <Text size="sm" tone="muted" class="mt-1 font-mono uppercase tracking-wide">
-                {item.category}
-              </Text>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
   </Section>
 
-  {/* ── Services (sticky-stacking panels) ──────────────────────────────── */}
+
+  <Artists />
+
+  
   <Services />
 
   </div>
 </BaseLayout>
 
 <style>
-  /* Base zoom gives the parallax drift room to move without exposing edges. */
+  
   .hero-img {
     transform: scale(1.25);
     transform-origin: center;
@@ -161,10 +148,8 @@ const { hero, manifesto, work, stats, cta } = home;
 </style>
 
 <script>
-  // Light parallax: the pinned hero image drifts up at a fraction of scroll
-  // speed, so it doesn't fully follow the page while the sections below cover
-  // it. Scroll position is required, so a rAF-throttled handler is justified.
-  const FACTOR = 0.1; // image moves at 10% of scroll — kept under the 1.25 zoom
+
+  const FACTOR = 0.1;
   let ticking = false;
 
   const prefersReduce = () =>
@@ -172,8 +157,7 @@ const { hero, manifesto, work, stats, cta } = home;
 
   function render() {
     ticking = false;
-    // Translate only — the wrapper moves image + text together. The image's
-    // own scale(1.25) lives in CSS (.hero-img) so the text isn't scaled.
+
     const layer = document.querySelector<HTMLElement>(".hero-parallax");
     if (!layer) return;
     if (prefersReduce()) {
@@ -192,6 +176,6 @@ const { hero, manifesto, work, stats, cta } = home;
   }
 
   window.addEventListener("scroll", onScroll, { passive: true });
-  // Re-sync on initial load and after every view-transition navigation.
+
   document.addEventListener("astro:page-load", render);
 </script>
