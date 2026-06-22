@@ -1,6 +1,4 @@
-# Astro + Tailwind + TypeScript boilerplate
-
-A small opinionated base for static marketing sites.
+# Astro + Tailwind + TypeScript
 
 ## Quick start
 
