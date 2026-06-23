@@ -1,0 +1,57 @@
+---
+// Global smooth scrolling via Lenis, synced to GSAP ScrollTrigger.
+// Driven by <html data-smooth-scroll="true"> (config.motion.smoothScroll) and
+// skipped for users who prefer reduced motion. Lenis smooths the real scroll
+// position, so wheel jumps become an eased glide — pinned ScrollTriggers ride
+// on top of it instead of snapping to discrete scroll deltas.
+---
+
+<script>
+  import Lenis from "lenis";
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let lenis: Lenis | undefined;
+
+  // gsap.ticker reports time in seconds; Lenis' raf wants milliseconds. Driving
+  // Lenis from the ticker keeps the scroll and the animations on one rAF loop.
+  const tick = (time: number) => lenis?.raf(time * 1000);
+
+  // When ScrollTrigger recomputes (e.g. after a pin adds its spacer and the
+  // document grows), re-measure Lenis. Without this, Lenis keeps the old scroll
+  // limit and you can't reach content past the pin — that's the missing footer.
+  const lenisResize = () => lenis?.resize();
+
+  function start() {
+    if (lenis) return;
+
+    const enabled = document.documentElement.dataset.smoothScroll === "true";
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!enabled || reduce) return;
+
+    lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    lenis.on("scroll", ScrollTrigger.update);
+    ScrollTrigger.addEventListener("refresh", lenisResize);
+
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  function stop() {
+    if (!lenis) return;
+    gsap.ticker.remove(tick);
+    ScrollTrigger.removeEventListener("refresh", lenisResize);
+    lenis.destroy();
+    lenis = undefined;
+  }
+
+  // Initial load + every Astro view-transition navigation.
+  document.addEventListener("astro:page-load", () => {
+    start();
+    ScrollTrigger.refresh();
+  });
+  // Tear down before the DOM is swapped so we re-init cleanly on the next page.
+  document.addEventListener("astro:before-swap", stop);
+</script>

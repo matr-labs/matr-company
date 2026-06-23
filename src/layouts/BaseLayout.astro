@@ -6,6 +6,7 @@ import { ViewTransitions } from "astro:transitions";
 import geistSans from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import PageShell from "@layout/PageShell.astro";
 import PageShellWOHeader from "@layout/PageShellWOHeader.astro";
+import SmoothScroll from "@layout/SmoothScroll.astro";
 import { resolveSeo, type SeoInput } from "@lib/seo";
 import { OG_IMAGE } from "@lib/constants";
 import { config } from "@config";
@@ -60,5 +61,6 @@ const seo = resolveSeo({ ...seoInput, path: seoInput?.path ?? Astro.url.pathname
     <Shell>
       <slot />
     </Shell>
+    <SmoothScroll />
   </body>
 </html>
