@@ -1,0 +1,134 @@
+---
+import Section from "@ui/Section.astro";
+import Container from "@ui/Container.astro";
+import Heading from "@ui/Heading.astro";
+import H3 from "@ui/Heading.astro";
+import ImageBlock from "@ui/ImageBlock.astro";
+import { home } from "@content/home";
+const { manifesto } = home;
+---
+
+<Section
+  tone="surface"
+  contained={false}
+  class="manifesto relative flex min-h-[72svh] flex-col justify-center overflow-hidden"
+>
+  <div class="manifesto__media" data-parallax>
+    <ImageBlock
+      src={manifesto.image}
+      alt={manifesto.imageAlt}
+      loading="lazy"
+      sizes="(min-width: 600px) 50vw, 100vw"
+      class="h-full w-full object-cover"
+    />
+  </div>
+
+  <Container width="full">
+    <div data-reveal>
+      <Heading level={3}>{manifesto.label}</Heading>
+    </div>
+  </Container>
+
+  <Container width="default" class="relative z-[1]">
+    <div class="mt-60 max-w-3xl">
+      <div data-reveal>
+        <Heading level={1} size="hero">{manifesto.title}</Heading>
+      </div>
+
+      {
+        manifesto.body && (
+          <div data-reveal class="mt-8 pl-8 md:pl-[20%]">
+            <H3>{manifesto.body}</H3>
+          </div>
+        )
+      }
+    </div>
+  </Container>
+</Section>
+
+<style>
+  .manifesto__media {
+    position: absolute;
+    inset: -12% 0;
+    z-index: 0;
+    will-change: transform;
+  }
+
+  @media (min-width: 768px) {
+    .manifesto__media {
+      top: -10%;
+      bottom: -10%;
+      left: auto;
+      right: 0;
+      width: 58%;
+    }
+  }
+
+  .manifesto__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.85),
+      rgba(0, 0, 0, 0.55) 55%,
+      rgba(0, 0, 0, 0.3)
+    );
+  }
+</style>
+
+<script>
+  import gsap from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let mm: ReturnType<typeof gsap.matchMedia> | undefined;
+
+  function build() {
+    mm?.revert();
+
+    const section = document.querySelector<HTMLElement>(".manifesto");
+    if (!section) return;
+
+    mm = gsap.matchMedia();
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const media = section.querySelector<HTMLElement>("[data-parallax]");
+      const reveals = section.querySelectorAll<HTMLElement>("[data-reveal]");
+
+      if (media) {
+        gsap.fromTo(
+          media,
+          { yPercent: 9 },
+          {
+            yPercent: -9,
+            ease: "none",
+            scrollTrigger: {
+              trigger: section,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          },
+        );
+      }
+
+      gsap.from(reveals, {
+        y: 40,
+        autoAlpha: 0,
+        duration: 1,
+        stagger: 0.14,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: section,
+          start: "top 72%",
+          once: true,
+        },
+      });
+    });
+  }
+
+  build();
+  document.addEventListener("astro:page-load", build);
+</script>

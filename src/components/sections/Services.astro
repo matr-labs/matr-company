@@ -1,6 +1,7 @@
 ---
 
 import Section from "@ui/Section.astro";
+import Container from "@ui/Container.astro";
 import ImageBlock from "@ui/ImageBlock.astro";
 import Heading from "@ui/Heading.astro";
 import Text from "@ui/Text.astro";
@@ -13,9 +14,6 @@ const { services } = home;
 <Section id="services" tone="surface" width="full" contained={false}>
   
   <div class="svcs">
-    <div class="svcs__intro">
-      <Heading level={2} size="lg">{services.title}</Heading>
-    </div>
 
     {
       servicesWithNo.map((service) => (
@@ -23,20 +21,26 @@ const { services } = home;
         // releases (scrolls up + out) once you scroll past its media.
         <article class="svc-panel">
           <header class="svc-head">
-            <Text tag="span" size="sm" tone="muted" class="flex-none font-mono">
-              {service.no}
-            </Text>
+            <Container width="default" class="w-full">
+              <div class="svc-head__grid max-w-3xl">
+                  <Heading level={4}>
+                  {service.no}
+              </Heading>
 
-            <Heading level={1} size="2xl">
-              {service.title}
-            </Heading>
+                <div class="svc-head__main">
+                  <Heading level={1} size="2xl">
+                    {service.title}
+                  </Heading>
 
-            <Heading
-              level={2}
-              class="ml-auto max-w-[38ch] max-md:max-w-none max-md:text-sm"
-            >
-              {service.description}
-            </Heading>
+                  <Heading
+                    level={2}
+                    class="ml-auto max-w-[38ch] max-md:max-w-none max-md:text-sm"
+                  >
+                    {service.description}
+                  </Heading>
+                </div>
+              </div>
+            </Container>
           </header>
 
           <div class="svc-media">
@@ -75,16 +79,28 @@ const { services } = home;
   .svc-head {
     position: sticky;
     top: var(--stack-top);
-    z-index: 2; 
+    z-index: 2;
     display: flex;
     align-items: top;
-    gap: clamp(1rem, 3vw, 3rem);
     width: 100%;
-    height: var(--head-h);
-    overflow: hidden;
-    padding: 0 var(--space-container);
-    background: var(--color-surface); 
+    min-height: var(--head-h);
+    padding-block: 1.5rem;
+    background: var(--color-surface);
     border-top: 1px solid var(--color-border);
+  }
+
+  .svc-head__grid {
+    display: grid;
+    grid-template-columns: 20% 1fr;
+    align-items: start;
+    width: 100%;
+  }
+
+  .svc-head__main {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(1rem, 3vw, 3rem);
+    min-width: 0;
   }
 
   
@@ -108,12 +124,20 @@ const { services } = home;
   @media (max-width: 768px) {
     .svc-head {
       position: static;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
+      align-items: stretch;
       height: auto;
       overflow: visible;
-      padding: 1.25rem var(--space-container);
+      padding-top: 1.25rem;
+      padding-bottom: 1.25rem;
+    }
+    .svc-head__grid {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+    .svc-head__main {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
     }
   }
 

@@ -6,11 +6,13 @@ import Heading from "@ui/Heading.astro";
 import Text from "@ui/Text.astro";
 import ImageBlock from "@ui/ImageBlock.astro";
 import Artists from "@sections/Artists.astro";
+import Manifesto from "@sections/Manifesto.astro";
 import Services from "@sections/Services.astro";
+import CTA from "@sections/CTA.astro";
 import { home } from "@content/home";
 import H3 from "@ui/Heading.astro";
 
-const { hero, intro, industries } = home;
+const { hero, intro, industries, cta } = home;
 ---
 
 <BaseLayout seo={{ title: "Home", titleAbsolute: true }}>
@@ -49,7 +51,7 @@ const { hero, intro, industries } = home;
     <H3>{hero.brand}</H3>
     </div>
   <Section width="full" tone="surface">
-    <Container width="full" class="relative flex flex-1 flex-col justify-end gap-12">
+    <div class="relative flex flex-1 flex-col justify-end gap-12">
       
       <div class="hero-rise flex flex-col gap-6">
         <Heading level={1} size="hero" tracking="tighter">
@@ -89,15 +91,18 @@ const { hero, intro, industries } = home;
     }
   </ul>
 
-    </Container>
+    </div>
 
   </Section>
 
 
   <Artists />
 
-  
+  <Manifesto />
+
   <Services />
+
+  <CTA title={cta.title} body={cta.body} action={cta.action} />
 
   </div>
 </BaseLayout>

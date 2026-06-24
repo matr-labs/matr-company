@@ -236,5 +236,19 @@
         "image": "/images/home/service-collaboration.jpg"
       }
     ]
+  },
+
+  "manifesto": {
+    "label": "(Whatever the text is)",
+    "title": "Manifesto comes here.",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "/images/home/hero.jpg",
+    "imageAlt": ""
+  },
+
+  "cta": {
+    "title": "Let's make something together.",
+    "body": "Tell us what you're imagining. We'll figure out how to build it.",
+    "action": { "label": "Get in touch", "href": "/contact" }
   }
 }

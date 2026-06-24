@@ -5,6 +5,7 @@ import Heading from "@ui/Heading.astro";
 import ImageBlock from "@ui/ImageBlock.astro";
 import { home } from "@content/home";
 const { artists } = home;
+import H3 from "@ui/Heading.astro";
 
 // Single source of truth for the section. `--banner-h` (set on the pin wrapper
 // below) drives the banner height, the offset that drops the names window to
@@ -12,7 +13,6 @@ const { artists } = home;
 const BANNER_H = "80vh";
 ---
 <Section id="artists" width="full" tone="surface">
-  <Container width="full">
 
     <div
       class="artists__pin md:grid md:grid-cols-2 md:items-start md:gap-x-8"
@@ -27,10 +27,10 @@ const BANNER_H = "80vh";
             class="artists__banner-img h-full w-full rounded-lg object-cover"
           />
         </div>
-        <Heading level={1} >
+        <H3>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque
           nulla tellus, tristique id pretium a, dictum et lorem.
-        </Heading>
+        </H3>
       </div>
 
       <div class="artists__viewport">
@@ -49,7 +49,6 @@ const BANNER_H = "80vh";
         </ul>
       </div>
     </div>
-  </Container>
 </Section>
 
 <script>
