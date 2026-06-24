@@ -1,58 +1,273 @@
 ---
-import Section from "@ui/Section.astro";
-import Heading from "@ui/Heading.astro";
-import Text from "@ui/Text.astro";
-import Button from "@ui/Button.astro";
-
-interface Cta {
-  label: string;
-  href: string;
-}
-
-interface Props {
-  eyebrow?: string;
-  title: string;
-  subtitle?: string;
-  primaryCta?: Cta;
-  secondaryCta?: Cta;
-}
-
-const { eyebrow, title, subtitle, primaryCta, secondaryCta } = Astro.props;
+import ImageBlock from "@ui/ImageBlock.astro";
+import { home } from "@content/home";
+const { hero } = home;
 ---
 
-<Section tag="section" width="narrow" class="text-center">
-  {
-    eyebrow && (
-      <Text tone="muted" size="sm" align="center" class="uppercase tracking-widest">
-        {eyebrow}
-      </Text>
-    )
+<section class="hero">
+  <div class="hero__counter"><p>0</p></div>
+
+  <div class="hero__stage">
+    <div class="hero__overlay"></div>
+
+    <div class="hero__wordmark">
+      <h1></h1>
+    </div>
+
+    <div class="hero__image">
+      <ImageBlock src={hero.image} alt={hero.imageAlt} loading="eager" sizes="100vw" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    --hero-field: #ededed;
+    --hero-ink: #1a1a1a;
+    position: relative;
+    height: 100svh;
+    overflow: hidden;
+    background-color: var(--hero-field);
+    color: var(--hero-ink);
   }
 
-  <Heading level={1} size="hero" align="center" class="mt-4">{title}</Heading>
-
-  {
-    subtitle && (
-      <Text size="md" tone="muted" align="center" class="mx-auto mt-6 max-w-2xl">
-        {subtitle}
-      </Text>
-    )
+  .hero :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  {
-    (primaryCta || secondaryCta) && (
-      <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-        {primaryCta && (
-          <Button href={primaryCta.href} variant="primary" size="lg">
-            {primaryCta.label}
-          </Button>
-        )}
-        {secondaryCta && (
-          <Button href={secondaryCta.href} variant="secondary" size="lg">
-            {secondaryCta.label}
-          </Button>
-        )}
-      </div>
-    )
+  .hero__counter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
   }
-</Section>
+  .hero__counter p {
+    margin: 0;
+    color: var(--hero-ink);
+    font-family: var(--font-mono);
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-weight: var(--weight-semibold);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero__stage {
+    position: absolute;
+    inset: 0;
+    transform: scale(0.7);
+    transform-origin: center;
+    clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
+    will-change: transform, clip-path;
+    z-index: 1;
+  }
+
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background-color: var(--hero-ink);
+    clip-path: polygon(0 100%, 100% 100%, 100% 0, 0 0);
+    z-index: 2;
+  }
+
+  .hero__wordmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(0 100%, 100% 100%, 100% 0, 0 0);
+    z-index: 1;
+  }
+  .hero__wordmark h1 {
+    margin: 0;
+    color: var(--hero-ink);
+    font-family: var(--font-sans);
+    font-size: 19vw;
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.05em;
+    line-height: 0.85;
+    white-space: nowrap;
+  }
+  .hero__wordmark h1 span {
+    display: inline-block;
+    transform: translateY(60vh);
+  }
+
+  .hero__image {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .hero__image :global(img) {
+    transform: scale(2);
+    transform-origin: center;
+  }
+
+  @media (max-width: 768px) {
+    .hero__wordmark {
+      height: 60vh;
+    }
+    .hero__wordmark h1 {
+      font-size: 26vw;
+    }
+    .hero__image {
+      height: 40vh;
+    }
+  }
+</style>
+
+<script>
+  import gsap from "gsap";
+  import { CustomEase } from "gsap/CustomEase";
+
+  gsap.registerPlugin(CustomEase);
+
+  const REPLAY_EVERY_TIME = true;
+  const SESSION_KEY = "matr:hero-intro-played";
+
+  function setScrollLock(lock: boolean) {
+    const root = document.documentElement;
+    if (lock) root.dataset.scrollLocked = "true";
+    else delete root.dataset.scrollLocked;
+    root.style.overflow = lock ? "hidden" : "";
+    window.dispatchEvent(
+      new CustomEvent(lock ? "matr:scroll-lock" : "matr:scroll-unlock"),
+    );
+  }
+
+  function init() {
+    const hero = document.querySelector<HTMLElement>(".hero");
+    if (!hero || hero.dataset.heroReady === "true") return;
+    hero.dataset.heroReady = "true";
+
+    const wordmark = hero.querySelector<HTMLElement>(".hero__wordmark h1");
+    const counter = hero.querySelector<HTMLElement>(".hero__counter p");
+    if (!wordmark || !counter) return;
+
+    CustomEase.create(
+      "hop",
+      "M0,0 C0.29,0 0.348,0.05 0.422,0.134 0.494,0.217 0.484,0.355 0.5,0.5 0.518,0.662 0.515,0.793 0.596,0.876 0.701,0.983 0.72,0.987 1,1 ",
+    );
+
+    wordmark.innerHTML = (wordmark.textContent || "")
+      .split("")
+      .map((c) => `<span>${c === " " ? "&nbsp;&nbsp;" : c}</span>`)
+      .join("");
+
+    const stage = hero.querySelector(".hero__stage");
+    const overlay = hero.querySelector(".hero__overlay");
+    const heroImg = hero.querySelector(".hero__image img");
+    const spans = hero.querySelectorAll(".hero__wordmark h1 span");
+    const counterBox = hero.querySelector(".hero__counter");
+    const header = document.querySelector("header");
+
+    const settle = () => {
+      gsap.set(stage, {
+        scale: 1,
+        clipPath: "polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)",
+      });
+      gsap.set(overlay, { clipPath: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)" });
+      gsap.set(heroImg, { scale: 1 });
+      gsap.set(spans, { y: 0 });
+      gsap.set(counterBox, { autoAlpha: 0 });
+      if (header) gsap.set(header, { autoAlpha: 1, y: 0 });
+      setScrollLock(false);
+    };
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (
+      reduce ||
+      (!REPLAY_EVERY_TIME && sessionStorage.getItem(SESSION_KEY) === "true")
+    ) {
+      settle();
+      return;
+    }
+    sessionStorage.setItem(SESSION_KEY, "true");
+
+    if (header) gsap.set(header, { autoAlpha: 0, y: -16 });
+    setScrollLock(true);
+
+    const reveal = () => {
+      gsap.to(stage, {
+        clipPath: "polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)",
+        duration: 2,
+        ease: "hop",
+        onStart: () => {
+          gsap.to(stage, {
+            scale: 1,
+            duration: 2.25,
+            ease: "power3.inOut",
+            delay: 0.25,
+          });
+          gsap.to(overlay, {
+            clipPath: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)",
+            duration: 2,
+            delay: 0.5,
+            ease: "hop",
+          });
+          gsap.to(heroImg, {
+            scale: 1,
+            duration: 2.25,
+            ease: "power3.inOut",
+            delay: 0.25,
+          });
+          gsap.to(spans, {
+            y: 0,
+            stagger: 0.1,
+            duration: 2,
+            ease: "power4.inOut",
+            delay: 0.75,
+            onComplete: () => setScrollLock(false),
+          });
+          if (header) {
+            gsap.to(header, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 1.2,
+              ease: "power3.out",
+              delay: 1.1,
+            });
+          }
+        },
+      });
+    };
+
+    const animateCounter = () => {
+      let value = 0;
+      const interval = 300;
+      const maxDuration = 2000;
+      const end = 100;
+      const start = Date.now();
+      const tick = () => {
+        const elapsed = Date.now() - start;
+        if (elapsed < maxDuration) {
+          value = Math.min(value + Math.floor(Math.random() * 30) + 5, end);
+          counter.textContent = String(value);
+          setTimeout(tick, interval);
+        } else {
+          counter.textContent = String(end);
+          gsap.to(counterBox, {
+            autoAlpha: 0,
+            duration: 0.6,
+            ease: "power2.in",
+            onStart: reveal,
+          });
+        }
+      };
+      tick();
+    };
+
+    gsap.delayedCall(0.4, animateCounter);
+  }
+
+  init();
+  document.addEventListener("astro:page-load", init);
+</script>

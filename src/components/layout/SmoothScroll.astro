@@ -47,9 +47,20 @@
     lenis = undefined;
   }
 
+  // A scroll-locked flag lives on <html data-scroll-locked>; honouring it here
+  // means a lock requested before Lenis exists still applies once it starts.
+  function applyLock() {
+    if (!lenis) return;
+    if (document.documentElement.dataset.scrollLocked === "true") lenis.stop();
+    else lenis.start();
+  }
+  window.addEventListener("matr:scroll-lock", applyLock);
+  window.addEventListener("matr:scroll-unlock", applyLock);
+
   // Initial load + every Astro view-transition navigation.
   document.addEventListener("astro:page-load", () => {
     start();
+    applyLock();
     ScrollTrigger.refresh();
   });
   // Tear down before the DOM is swapped so we re-init cleanly on the next page.
