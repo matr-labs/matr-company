@@ -3,11 +3,12 @@ import { cn } from "@lib/cn";
 
 interface Props {
   level?: 1 | 2 | 3 | 4 | 5 | 6;
-  size?: "sm" | "base" | "md" | "lg" | "xl" | "2xl" | "hero";
+  size?: "xs" | "sm" | "base" | "md" | "lg" | "xl" | "2xl" | "hero";
   weight?: "normal" | "medium" | "semibold" | "bold";
   leading?: "none" | "tight" | "snug" | "normal" | "relaxed";
   tracking?: "tighter" | "tight" | "normal" | "wide";
   align?: "left" | "center";
+  tone?: "text" | "muted" | "accent" | "surface";
   class?: string;
 }
 
@@ -18,6 +19,7 @@ const {
   leading,
   tracking = "tight",
   align = "left",
+  tone,
   class: className,
 } = Astro.props;
 
@@ -61,6 +63,13 @@ const trackings = {
   normal: "tracking-normal",
   wide: "tracking-wide",
 };
+
+const tones = {
+  text: "text-text",
+  muted: "text-muted",
+  accent: "text-accent",
+  surface: "text-surface",
+};
 ---
 
 <Tag
@@ -71,6 +80,7 @@ const trackings = {
     leadings[resolvedLeading],
     trackings[tracking],
     align === "center" && "text-center",
+    tone && tones[tone],
     className,
   )}
 >

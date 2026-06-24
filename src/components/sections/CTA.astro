@@ -13,16 +13,17 @@ interface Props {
 const { title, body, action } = Astro.props;
 ---
 
-<Section tone="accent" width="narrow" class="text-center">
+<Section tone="accent" width="full">
+  <div class="flex flex-row items-center">
+  <div class="flex flex-row flex-1 items-center">
   <Heading level={2} size="xl" align="center">{title}</Heading>
   {
     body && (
-      <Text align="center" size="md" class="mx-auto mt-4 max-w-xl opacity-90">
+      <Heading level={3} align="left" size="md" class="mx-auto max-w-xl opacity-90">
         {body}
-      </Text>
+      </Heading>
     )
   }
-  <div class="mt-8 flex justify-center">
-    <Button href={action.href} variant="secondary" size="lg">{action.label}</Button>
   </div>
+    <Button href={action.href} variant="secondary" size="lg">{action.label}</Button></div>
 </Section>

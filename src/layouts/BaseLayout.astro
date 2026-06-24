@@ -62,5 +62,11 @@ const seo = resolveSeo({ ...seoInput, path: seoInput?.path ?? Astro.url.pathname
       <slot />
     </Shell>
     <SmoothScroll />
+
+    <script>
+      document.addEventListener("astro:before-swap", () => {
+        (window as unknown as { __matrNavigated?: boolean }).__matrNavigated = true;
+      });
+    </script>
   </body>
 </html>

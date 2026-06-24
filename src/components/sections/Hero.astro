@@ -133,9 +133,6 @@ const { hero } = home;
 
   gsap.registerPlugin(CustomEase);
 
-  const REPLAY_EVERY_TIME = true;
-  const SESSION_KEY = "matr:hero-intro-played";
-
   function setScrollLock(lock: boolean) {
     const root = document.documentElement;
     if (lock) root.dataset.scrollLocked = "true";
@@ -188,14 +185,12 @@ const { hero } = home;
     };
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (
-      reduce ||
-      (!REPLAY_EVERY_TIME && sessionStorage.getItem(SESSION_KEY) === "true")
-    ) {
+    const navigated = (window as unknown as { __matrNavigated?: boolean })
+      .__matrNavigated;
+    if (reduce || navigated) {
       settle();
       return;
     }
-    sessionStorage.setItem(SESSION_KEY, "true");
 
     gsap.set(taglineWords, { autoAlpha: 0, y: 40 });
     if (header) gsap.set(header, { yPercent: -100 });
