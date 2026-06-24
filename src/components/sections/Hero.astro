@@ -1,5 +1,6 @@
 ---
 import ImageBlock from "@ui/ImageBlock.astro";
+import HeroTagline from "@sections/HeroTagline.astro";
 import { home } from "@content/home";
 const { hero } = home;
 ---
@@ -18,6 +19,8 @@ const { hero } = home;
       <ImageBlock src={hero.image} alt={hero.imageAlt} loading="eager" sizes="100vw" />
     </div>
   </div>
+
+  <HeroTagline />
 </section>
 
 <style>
@@ -167,6 +170,7 @@ const { hero } = home;
     const heroImg = hero.querySelector(".hero__image img");
     const spans = hero.querySelectorAll(".hero__wordmark h1 span");
     const counterBox = hero.querySelector(".hero__counter");
+    const taglineWords = hero.querySelectorAll(".hero__tagline-word");
     const header = document.querySelector("header");
 
     const settle = () => {
@@ -178,7 +182,8 @@ const { hero } = home;
       gsap.set(heroImg, { scale: 1 });
       gsap.set(spans, { y: 0 });
       gsap.set(counterBox, { autoAlpha: 0 });
-      if (header) gsap.set(header, { autoAlpha: 1, y: 0 });
+      gsap.set(taglineWords, { autoAlpha: 1, y: 0 });
+      if (header) gsap.set(header, { yPercent: 0 });
       setScrollLock(false);
     };
 
@@ -192,7 +197,8 @@ const { hero } = home;
     }
     sessionStorage.setItem(SESSION_KEY, "true");
 
-    if (header) gsap.set(header, { autoAlpha: 0, y: -16 });
+    gsap.set(taglineWords, { autoAlpha: 0, y: 40 });
+    if (header) gsap.set(header, { yPercent: -100 });
     setScrollLock(true);
 
     const reveal = () => {
@@ -212,6 +218,7 @@ const { hero } = home;
             duration: 2,
             delay: 0.5,
             ease: "hop",
+            onComplete: () => setScrollLock(false),
           });
           gsap.to(heroImg, {
             scale: 1,
@@ -225,15 +232,21 @@ const { hero } = home;
             duration: 2,
             ease: "power4.inOut",
             delay: 0.75,
-            onComplete: () => setScrollLock(false),
+          });
+          gsap.to(taglineWords, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 1,
+            ease: "power3.out",
+            stagger: 0.2,
+            delay: 1.5,
           });
           if (header) {
             gsap.to(header, {
-              autoAlpha: 1,
-              y: 0,
-              duration: 1.2,
+              yPercent: 0,
+              duration: 0.9,
               ease: "power3.out",
-              delay: 1.1,
+              delay: 2.9,
             });
           }
         },

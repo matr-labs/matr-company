@@ -1,0 +1,36 @@
+---
+import Heading from "@ui/Heading.astro";
+const words = ["We", "make", "art", "easy."];
+---
+
+<div class="hero__tagline mx-auto max-w-3xl">
+  {
+    words.map((word) => (
+      <Heading
+        level={2}
+        size="2xl"
+        align="center"
+        tracking="normal"
+        class="hero__tagline-word text-surface"
+      >
+        {word}
+      </Heading>
+    ))
+  }
+</div>
+
+<style>
+  .hero__tagline {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: center;
+    pointer-events: none;
+  }
+  .hero__tagline-word {
+    text-shadow: 0 1px 24px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+  }
+</style>
