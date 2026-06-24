@@ -1,36 +1,101 @@
 ---
 import Heading from "@ui/Heading.astro";
-const words = ["We", "make", "art", "easy."];
+const words = ["We", "make", "art"];
+const carousel = ["easy", "simple", "accessible", "matter"];
+
+const hoverClass =
+  "pointer-events-auto transition-colors duration-[400ms] ease-out hover:bg-black hover:transition-none";
 ---
 
-<div class="hero__tagline mx-auto max-w-3xl">
+<div
+  class="hero__tagline pointer-events-none absolute inset-0 z-[2] mx-auto grid max-w-3xl grid-cols-4 items-center"
+>
   {
     words.map((word) => (
       <Heading
         level={2}
         size="2xl"
-        align="center"
+        align="left"
         tracking="normal"
-        class="hero__tagline-word text-surface"
+        class={`hero__tagline-word ${hoverClass} text-surface max-md:text-lg opacity-0 [text-shadow:0_1px_24px_rgba(0,0,0,0.35)]`}
       >
         {word}
       </Heading>
     ))
   }
+
+  <div class={`hero__tagline-word grid place-items-start opacity-0 ${hoverClass}`}>
+    {
+      carousel.map((word, i) => (
+        <Heading
+          level={2}
+          size="2xl"
+          align="center"
+          tracking="normal"
+          class={`hero__carousel-item [grid-area:1/1] whitespace-nowrap text-surface transition-[transform,opacity] duration-[450ms] ease-out max-md:text-lg [text-shadow:0_1px_24px_rgba(0,0,0,0.35)] ${i === 0 ? "opacity-100" : "opacity-0"}`}
+        >
+          {word}
+        </Heading>
+      ))
+    }
+  </div>
 </div>
 
-<style>
-  .hero__tagline {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    align-items: center;
-    pointer-events: none;
+<script>
+  const ROTATE_MS = 1000;
+  const SLIDE_MS = 450;
+
+  let intervalId: ReturnType<typeof setInterval> | undefined;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  function stop() {
+    if (intervalId) clearInterval(intervalId);
+    if (timeoutId) clearTimeout(timeoutId);
+    intervalId = undefined;
+    timeoutId = undefined;
   }
-  .hero__tagline-word {
-    text-shadow: 0 1px 24px rgba(0, 0, 0, 0.35);
-    opacity: 0;
+
+  function place(el: HTMLElement, y: string, opacity: string) {
+    el.style.transition = "none";
+    el.style.transform = `translateY(${y})`;
+    el.style.opacity = opacity;
+    void el.offsetHeight;
+    el.style.transition = "";
   }
-</style>
+
+  function init() {
+    stop();
+    const items = Array.from(
+      document.querySelectorAll<HTMLElement>(".hero__carousel-item"),
+    );
+    if (items.length < 2) return;
+
+    let current = 0;
+    items.forEach((el, idx) =>
+      place(el, idx === 0 ? "0" : "100%", idx === 0 ? "1" : "0"),
+    );
+
+    // Wait out the hero intro reveal so the first word reads as "easy" before it
+    // starts rotating; on client-side navigation there's no reveal to wait for.
+    const navigated = (window as unknown as { __matrNavigated?: boolean })
+      .__matrNavigated;
+    const startAfter = navigated ? 600 : 5200;
+
+    timeoutId = setTimeout(() => {
+      intervalId = setInterval(() => {
+        const prev = current;
+        items[prev].style.transform = "translateY(-100%)";
+        items[prev].style.opacity = "0";
+        current = (current + 1) % items.length;
+        items[current].style.transform = "translateY(0)";
+        items[current].style.opacity = "1";
+        // park the outgoing word below again (no transition) so it rises next time
+        window.setTimeout(() => place(items[prev], "100%", "0"), SLIDE_MS);
+      }, ROTATE_MS);
+    }, startAfter);
+  }
+
+  init();
+  document.addEventListener("astro:page-load", init);
+  document.addEventListener("astro:before-swap", stop);
+</script>
