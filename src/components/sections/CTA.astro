@@ -15,11 +15,11 @@ const { title, body, action } = Astro.props;
 
 <Section tone="accent" width="full">
   <div class="flex flex-row items-center">
-  <div class="flex flex-row flex-1 items-center">
+  <div class="flex flex-row flex-1 items-center justify-start gap-8">
   <Heading level={2} size="xl" align="center">{title}</Heading>
   {
     body && (
-      <Heading level={3} align="left" size="md" class="mx-auto max-w-xl opacity-90">
+      <Heading level={3} align="left" size="md" class="max-w-xl opacity-90">
         {body}
       </Heading>
     )

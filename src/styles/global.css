@@ -13,8 +13,20 @@
 
   html {
     -webkit-text-size-adjust: 100%;
-    
+
     overflow-x: clip;
+    scrollbar-width: thin;
+  }
+
+  ::-webkit-scrollbar {
+    width: 1px;
+    height: 1px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-muted);
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
 
   html[data-smooth-scroll="true"] {
