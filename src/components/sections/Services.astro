@@ -22,9 +22,9 @@ const { services } = home;
         <article class="svc-panel">
           <header class="svc-head">
             <Container width="default" class="w-full">
-              <div class="svc-head__grid max-w-3xl">
+              <div class="svc-head__grid ">
                   <Heading level={4}>
-                  {service.no}
+                  ({service.no})
               </Heading>
 
                 <div class="svc-head__main">
@@ -34,7 +34,7 @@ const { services } = home;
 
                   <Heading
                     level={2}
-                    class="ml-auto max-w-[38ch] max-md:max-w-none max-md:text-sm"
+                    class="ml-auto max-w-[38ch] max-md:max-w-none "
                   >
                     {service.description}
                   </Heading>

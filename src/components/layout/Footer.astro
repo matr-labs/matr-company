@@ -17,7 +17,7 @@ const { city, region, postalCode } = site.address;
 
 <footer class="bg-surface text-text">
   <Container width="full" class="py-16">
-    <div class="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
+    <div class="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4 ">
       <div>
         <Heading level={3} size="xs" weight="medium" tracking="wide" tone="muted">
           CONNECT
@@ -32,7 +32,7 @@ const { city, region, postalCode } = site.address;
                   rel="noopener"
                   class="transition-colors hover:text-accent"
                 >
-                  <Heading level={4} size="lg" weight="medium">
+                  <Heading level={4} size="lg" weight="medium" class="max-md:text-sm">
                     {socialLabels[key] ?? key}
                   </Heading>
                 </a>
@@ -51,9 +51,9 @@ const { city, region, postalCode } = site.address;
             href={`mailto:${site.email}`}
             class="block transition-colors hover:text-accent"
           >
-            <Heading level={4} size="lg" weight="medium">{site.email}</Heading>
+            <Heading level={4} size="lg" weight="medium" class="max-md:text-sm">{site.email}</Heading>
           </a>
-          <Heading level={4} size="lg" weight="medium">
+          <Heading level={4} size="lg" weight="medium" class="max-md:text-sm">
             {city}, {region} {postalCode}
           </Heading>
         </div>
@@ -63,9 +63,13 @@ const { city, region, postalCode } = site.address;
         <Heading level={3} size="xs" weight="medium" tracking="wide" tone="muted">
           LOCAL TIME
         </Heading>
-        <div class="mt-6">
-          <Heading level={4} size="lg" weight="medium">
-            24 Jan 2026<br>
+        <div class="mt-6  space-y-1">
+          <Heading level={4} size="lg" weight="medium" class="max-md:text-sm">
+            24 Jan 2026
+
+          </Heading>
+
+                    <Heading level={4} size="lg" weight="medium" class="max-md:text-sm">
             <span data-clock>--:--:-- </span> PM (EST)
           </Heading>
          
@@ -80,8 +84,12 @@ const { city, region, postalCode } = site.address;
           {
             footerNav.map((item) => (
               <li>
-                <a href={item.href} class="transition-colors hover:text-accent">
-                  <Heading level={4} size="lg" weight="medium">
+                <a
+                  href={item.href}
+                  data-samepage
+                  class="transition-colors hover:text-accent"
+                >
+                  <Heading level={4} size="lg" weight="medium"  class="max-md:text-sm">
                     {item.label}
                   </Heading>
                 </a>
@@ -107,7 +115,7 @@ const { city, region, postalCode } = site.address;
       class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
     >
       <Heading level={3} size="xs" weight="medium" tracking="wide" tone="muted">
-        © {year} {site.name.toUpperCase()}. ALL RIGHTS RESERVED.
+        © {year}{" "}{site.name}. ALL RIGHTS RESERVED.
       </Heading>
 
       <Heading level={3} size="xs" weight="medium" tracking="wide" tone="muted">
