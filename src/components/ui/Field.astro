@@ -1,0 +1,54 @@
+---
+import { cn } from "@lib/cn";
+
+interface Props {
+  name: string;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+  autocomplete?: string;
+  textarea?: boolean;
+  rows?: number;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  name,
+  type = "text",
+  placeholder,
+  required = false,
+  autocomplete,
+  textarea = false,
+  rows = 4,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const base =
+  "w-full border-b-2 border-text bg-transparent px-0 py-3 text-lg font-semibold text-text rounded-none" +
+  "placeholder:text-muted transition-colors focus:outline-none focus:rounded-none";
+---
+
+{
+  textarea ? (
+    <textarea
+      name={name}
+      placeholder={placeholder}
+      required={required}
+      rows={rows}
+      class={cn(base, "resize-none", className)}
+      {...rest}
+    />
+  ) : (
+    <input
+      name={name}
+      type={type}
+      placeholder={placeholder}
+      required={required}
+      autocomplete={autocomplete}
+      class={cn(base, className)}
+      {...rest}
+    />
+  )
+}

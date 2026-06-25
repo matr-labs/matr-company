@@ -89,7 +89,6 @@
         normalizePath(window.location.pathname)
       ) {
         event.preventDefault();
-        event.stopPropagation();
         scrollToTop();
       }
     },
@@ -104,4 +103,7 @@
   });
   // Tear down before the DOM is swapped so we re-init cleanly on the next page.
   document.addEventListener("astro:before-swap", stop);
+  // A fresh navigation should land at the top (Lenis otherwise keeps the old
+  // scroll position across the swap).
+  document.addEventListener("astro:after-swap", () => window.scrollTo(0, 0));
 </script>

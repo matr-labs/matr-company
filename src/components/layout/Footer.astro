@@ -1,111 +1,90 @@
 ---
 import Container from "@ui/Container.astro";
 import Heading from "@ui/Heading.astro";
+import ArrowLink from "@ui/ArrowLink.astro";
+import FooterColumn from "@layout/FooterColumn.astro";
 import { footerNav } from "@data/nav";
 import { site } from "@content/site";
+import footer from "@data/footer.json";
 
 const year = new Date().getFullYear();
-
-const socialLabels: Record<string, string> = {
-  twitter: "X / Twitter",
-  instagram: "Instagram",
-  linkedin: "LinkedIn",
-};
-const socials = Object.entries(site.social);
 const { city, region, postalCode } = site.address;
 ---
 
-<footer class="bg-surface text-text">
+<footer class="bg-surface text-text border-t">
   <Container width="full" class="py-16">
-    <div class="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4 ">
-      <div>
-        <Heading level={3} size="xs" weight="medium" tracking="wide" tone="muted">
-          CONNECT
-        </Heading>
-        <ul class="mt-6 space-y-1">
+    <div class="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
+      <FooterColumn heading={footer.headings.connect}>
+        <ul class="flex flex-col gap-1">
           {
-            socials.map(([key, href]) => (
+            footer.social.map((link) => (
               <li>
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noopener"
-                  class="transition-colors hover:text-accent"
-                >
-                  <Heading level={4} size="lg" weight="medium" class="max-md:text-sm">
-                    {socialLabels[key] ?? key}
-                  </Heading>
-                </a>
+                <ArrowLink
+                  href={link.href}
+                  label={link.label}
+                  external
+                  size="sm"
+                  sizeMd="lg"
+                  class="-ml-3"
+                />
               </li>
             ))
           }
         </ul>
-      </div>
+      </FooterColumn>
 
-      <div>
-        <Heading level={3} size="xs" weight="medium" tracking="wide" tone="muted">
-          SAY HELLO
-        </Heading>
-        <div class="mt-6 space-y-1">
-          <a
+      <FooterColumn heading={footer.headings.sayHello}>
+        <div class="space-y-2">
+          <ArrowLink
             href={`mailto:${site.email}`}
-            class="block transition-colors hover:text-accent"
-          >
-            <Heading level={4} size="lg" weight="medium" class="max-md:text-sm">{site.email}</Heading>
-          </a>
-          <Heading level={4} size="lg" weight="medium" class="max-md:text-sm">
-            {city}, {region} {postalCode}
+            label={site.email}
+            arrow
+            size="sm"
+            sizeMd="lg"
+            class="-ml-3"
+          />
+          <Heading level={4} size="sm" sizeMd="lg" weight="medium">
+            {city}, {region}
           </Heading>
         </div>
-      </div>
+      </FooterColumn>
 
-      <div>
-        <Heading level={3} size="xs" weight="medium" tracking="wide" tone="muted">
-          LOCAL TIME
-        </Heading>
-        <div class="mt-6  space-y-1">
-          <Heading level={4} size="lg" weight="medium" class="max-md:text-sm">
-            24 Jan 2026
-
+      <FooterColumn heading={footer.headings.localTime}>
+        <div class="space-y-2" data-localtime data-tz={footer.localTime.timeZone}>
+          <Heading level={4} size="sm" sizeMd="lg" weight="medium">
+            <span data-date>—</span>
           </Heading>
-
-                    <Heading level={4} size="lg" weight="medium" class="max-md:text-sm">
-            <span data-clock>--:--:-- </span> PM (EST)
+          <Heading level={4} size="sm" sizeMd="lg" weight="medium">
+            <span data-time>—</span>
           </Heading>
-         
         </div>
-      </div>
+      </FooterColumn>
 
-      <div>
-        <Heading level={3} size="xs" weight="medium" tracking="wide" tone="muted">
-          INDEX
-        </Heading>
-        <ul class="mt-6 space-y-1">
+      <FooterColumn heading={footer.headings.index}>
+        <ul class="flex flex-col gap-2">
           {
             footerNav.map((item) => (
               <li>
-                <a
+                <ArrowLink
                   href={item.href}
-                  data-samepage
-                  class="transition-colors hover:text-accent"
-                >
-                  <Heading level={4} size="lg" weight="medium"  class="max-md:text-sm">
-                    {item.label}
-                  </Heading>
-                </a>
+                  label={item.label}
+                  samepage
+                  arrow={false}
+                  size="sm"
+                  sizeMd="lg"
+                  class="-ml-3"
+                />
               </li>
             ))
           }
         </ul>
-      </div>
+      </FooterColumn>
     </div>
 
     <hr class="my-12 border-0 border-t border-border" />
 
     <div class="flex items-end gap-4 sm:gap-6">
-      <div
-        class="aspect-square w-[clamp(2rem,4vw,4.25rem)] shrink-0 bg-text"
-      ></div>
+      <div class="aspect-square w-[clamp(2rem,4vw,4.25rem)] shrink-0 bg-text"></div>
       <Heading level={2} size="2xl" weight="bold" tracking="tight" leading="none">
         {site.name}.
       </Heading>
@@ -114,12 +93,11 @@ const { city, region, postalCode } = site.address;
     <div
       class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
     >
-      <Heading level={3} size="xs" weight="medium"  tone="muted">
-        © {year}{" "}{site.name}. ALL RIGHTS RESERVED.
+      <Heading level={3} size="xs" weight="medium" tracking="wide" tone="muted" class="font-mono">
+        ©{" "}{year}{" "}{site.name.toUpperCase()}. {footer.legal.rights.toUpperCase()}.
       </Heading>
-
-      <Heading level={3} size="xs" weight="medium"  tone="muted">
-        MADE IN {city.toUpperCase()}
+      <Heading level={3} size="xs" weight="medium" tracking="wide" tone="muted" class="font-mono">
+        MADE IN {footer.legal.madeIn.toUpperCase()}
       </Heading>
     </div>
   </Container>
@@ -127,14 +105,33 @@ const { city, region, postalCode } = site.address;
 
 <script>
   function tick() {
-    const el = document.querySelector("[data-clock]");
-    if (!el) return;
-    el.textContent = new Date().toLocaleTimeString("en-US", {
-      hour12: false,
-      timeZone: "America/Los_Angeles",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+    const now = new Date();
+    document.querySelectorAll<HTMLElement>("[data-localtime]").forEach((el) => {
+      const tz = el.dataset.tz || undefined;
+      const dateEl = el.querySelector("[data-date]");
+      const timeEl = el.querySelector("[data-time]");
+      if (dateEl) {
+        dateEl.textContent = now.toLocaleDateString("en-US", {
+          timeZone: tz,
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+      }
+      if (timeEl) {
+        const time = now.toLocaleTimeString("en-US", {
+          timeZone: tz,
+          hour12: true,
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+        const tzName =
+          new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
+            .formatToParts(now)
+            .find((part) => part.type === "timeZoneName")?.value ?? "";
+        timeEl.textContent = `${time} (${tzName})`;
+      }
     });
   }
 

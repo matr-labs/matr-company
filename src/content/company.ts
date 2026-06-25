@@ -1,11 +1,16 @@
 export const company = {
   about: {
-    title: "Lorem ipsum dolor",
+    title: "How can technology serve art?",
     lead: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     body: [
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
-      "Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate.",
+      "We are a small team of artists and engineers that have been working to answer a simple question. We have worked with some of the brightest minds at MIT, along with experts in fabrication, robotics, printing, AI, and many other fields to develop interesting tools for artists and creatives to express themselves.",
+      "We aim to make technology more accessible to artists and creatives, and to help them bring their ideas to life. ",
     ],
+    heroImage: "/preloader/hero-img-3.jpg",
+    heroImageAlt: "matr labs",
+    image: "/preloader/hero-img-3.jpg",
+    imageAlt: "Lorem ipsum dolor sit amet",
+    cta: { label: "Get in touch", href: "/contact" },
   },
 
   values: [

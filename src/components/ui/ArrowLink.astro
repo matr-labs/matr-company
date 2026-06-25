@@ -1,0 +1,115 @@
+---
+import Heading from "@ui/Heading.astro";
+import { cn } from "@lib/cn";
+
+interface Props {
+  href?: string;
+  label: string;
+  size?: "sm" | "base" | "md" | "lg" | "xl";
+  sizeMd?: "sm" | "base" | "md" | "lg" | "xl";
+  arrow?: boolean;
+  external?: boolean;
+  samepage?: boolean;
+  type?: "button" | "submit" | "reset";
+  fill?: "ink" | "surface";
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  href,
+  label,
+  size = "lg",
+  sizeMd,
+  arrow = true,
+  external = false,
+  samepage = false,
+  type = "button",
+  fill = "ink",
+  class: className,
+  ...rest
+} = Astro.props;
+
+const rel = external ? "noopener noreferrer" : undefined;
+const target = external ? "_blank" : undefined;
+const Tag = href ? "a" : "button";
+
+const fillColor = fill === "surface" ? "text-surface" : "text-text";
+const hoverText =
+  fill === "surface" ? "group-hover:text-text" : "group-hover:text-surface";
+---
+
+<Tag
+  href={href}
+  rel={rel}
+  target={target}
+  type={href ? undefined : type}
+  data-samepage={samepage ? "" : undefined}
+  data-dither-link
+  {...rest}
+  class={cn(
+    "group relative inline-flex w-fit items-center overflow-hidden",
+    className,
+  )}
+>
+  <canvas
+    data-dither
+    class={cn(
+      "pointer-events-none absolute inset-0 h-full w-full [image-rendering:pixelated]",
+      fillColor,
+    )}></canvas>
+  <Heading
+    level={3}
+    size={size}
+    sizeMd={sizeMd}
+    weight="medium"
+    tracking="tight"
+    class={cn(
+      "relative inline-flex items-center gap-2 px-3 py-1 transition-colors duration-300 ease-out",
+      hoverText,
+    )}
+  >
+    {label}
+    {
+      arrow && (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          class="size-[0.9em] shrink-0 transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+        >
+          <line x1="7" y1="17" x2="17" y2="7" />
+          <polyline points="7 7 17 7 17 17" />
+        </svg>
+      )
+    }
+  </Heading>
+</Tag>
+
+<script>
+  import { DitherFill } from "@lib/dither";
+
+  function parseRgb(value: string): [number, number, number] {
+    const m = value.match(/\d+(?:\.\d+)?/g);
+    return m && m.length >= 3 ? [+m[0], +m[1], +m[2]] : [0, 0, 0];
+  }
+
+  function setup() {
+    document.querySelectorAll<HTMLElement>("[data-dither-link]").forEach((el) => {
+      const canvas = el.querySelector<HTMLCanvasElement>("[data-dither]");
+      if (!canvas || canvas.dataset.ready === "1") return;
+      canvas.dataset.ready = "1";
+      const color = parseRgb(getComputedStyle(canvas).color);
+      const dither = new DitherFill(canvas, { px: 1, soft: 0.6, color });
+      el.addEventListener("mouseenter", () => dither.animateTo(1, 300));
+      el.addEventListener("mouseleave", () => dither.animateTo(0, 240));
+    });
+  }
+
+  setup();
+  document.addEventListener("astro:page-load", setup);
+</script>

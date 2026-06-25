@@ -1,0 +1,15 @@
+{
+  "headings": {
+    "connect": "Connect",
+    "sayHello": "Say hello",
+    "localTime": "Local time",
+    "index": "Index"
+  },
+  "social": [
+    { "label": "X / Twitter", "href": "https://twitter.com/" },
+    { "label": "Instagram", "href": "https://instagram.com/" },
+    { "label": "LinkedIn", "href": "https://www.linkedin.com/" }
+  ],
+  "localTime": { "timeZone": "America/New_York" },
+  "legal": { "rights": "All rights reserved", "madeIn": "Brooklyn" }
+}

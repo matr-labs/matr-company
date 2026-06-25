@@ -1,0 +1,22 @@
+---
+import Heading from "@ui/Heading.astro";
+
+interface Props {
+  href: string;
+  label: string;
+  samepage?: boolean;
+  external?: boolean;
+}
+
+const { href, label, samepage = false, external = false } = Astro.props;
+---
+
+<a
+  href={href}
+  data-samepage={samepage ? "" : undefined}
+  target={external ? "_blank" : undefined}
+  rel={external ? "noopener" : undefined}
+  class="block transition-colors hover:text-accent"
+>
+  <Heading level={4} size="sm" sizeMd="lg" weight="medium">{label}</Heading>
+</a>

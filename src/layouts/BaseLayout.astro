@@ -31,6 +31,10 @@ const seo = resolveSeo({ ...seoInput, path: seoInput?.path ?? Astro.url.pathname
     <meta name="generator" content={Astro.generator} />
 
     <link rel="preload" href={geistSans} as="font" type="font/woff2" crossorigin />
+    <script
+      is:inline
+      src="https://kit.fontawesome.com/5e0dd40952.js"
+      crossorigin="anonymous"></script>
     <ViewTransitions />
 
     <title>{seo.title}</title>

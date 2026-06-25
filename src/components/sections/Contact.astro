@@ -2,7 +2,9 @@
 import Section from "@ui/Section.astro";
 import Heading from "@ui/Heading.astro";
 import Text from "@ui/Text.astro";
-import Button from "@ui/Button.astro";
+import Field from "@ui/Field.astro";
+import ArrowLink from "@ui/ArrowLink.astro";
+import { site } from "@content/site";
 
 interface Props {
   title?: string;
@@ -10,54 +12,121 @@ interface Props {
   action?: string;
 }
 
-const { title = "Get in touch", intro, action = "/api/contact" } = Astro.props;
-
-const fieldClass =
-  "w-full rounded-md border border-border bg-bg px-4 py-2.5 text-base text-text " +
-  "placeholder:text-muted focus-visible:border-accent focus-visible:outline-none";
-const labelClass = "mb-1.5 block text-sm font-medium text-text";
+const { title = "Let's talk.", intro, action = "/api/contact" } = Astro.props;
 ---
 
-<Section width="full" tone="surface"  class="py-20">
-  <div class="mx-auto max-w-xl">
-    <Heading level={2} size="lg" align="center">{title}</Heading>
-    {
-      intro && (
-        <Text tone="muted" align="center" class="mx-auto mt-3 max-w-md">
-          {intro}
-        </Text>
-      )
-    }
+<Section width="default" tone="surface" class="flex min-h-svh items-center">
+  <div class="grid w-full gap-12 pt-16 md:grid-cols-2 md:items-start ">
+    <div class="gap-8 flex flex-col h-full items-stretch">
+      <Heading level={1} size="hero" leading="none" class="contact-headline">
+        {title}
+      </Heading>
+      {
+        intro && (
+          <Heading level={2} class="whitespace-pre-line md:pl-24 md:mt-8">
+            {intro}
+          </Heading>
+        )
+      }
+    </div>
 
-    <form method="POST" action={action} class="mt-10 grid gap-5">
-      <div>
-        <label for="name" class={labelClass}>Name</label>
-        <input id="name" name="name" type="text" required autocomplete="name" class={fieldClass} />
-      </div>
+    <form method="POST" action={action} class="grid gap-8">
+      <Field
+        name="name"
+        placeholder="Name"
+        required
+        autocomplete="name"
+        data-contact-name
+      />
 
-      <div>
-        <label for="email" class={labelClass}>Email</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          autocomplete="email"
-          class={fieldClass}
-        />
-      </div>
+      <Field
+        name="email"
+        type="email"
+        placeholder="Email"
+        required
+        autocomplete="email"
+        data-contact-email
+      />
 
-      <div>
-        <label for="message" class={labelClass}>Message</label>
-        <textarea id="message" name="message" rows="5" required class={fieldClass}></textarea>
-      </div>
+      <Field name="message" placeholder="Message" required textarea rows={4} />
 
       <div class="absolute left-[-9999px]" aria-hidden="true">
         <label for="company">Company</label>
         <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
       </div>
 
-      <Button type="submit" variant="primary" size="lg" class="mt-2 w-full">Send message</Button>
+      <div class="-ml-3">
+      <ArrowLink type="submit" label="Send message" class="border-2 border-text"/>
+            <ArrowLink label="Copy email" arrow={false} data-copy-email={site.email} />
+</div>
     </form>
   </div>
 </Section>
+
+<script>
+  function setupCopy() {
+    const button = document.querySelector<HTMLElement>("[data-copy-email]");
+    if (!button || button.dataset.bound === "1") return;
+    button.dataset.bound = "1";
+
+    const labelEl = button.querySelector("h3");
+    const original = labelEl?.textContent ?? "";
+
+    button.addEventListener("click", async () => {
+      const address = button.dataset.copyEmail;
+      if (!address) return;
+      try {
+        await navigator.clipboard.writeText(address);
+        if (labelEl) {
+          labelEl.textContent = "Copied!";
+          window.setTimeout(() => {
+            labelEl.textContent = original;
+          }, 1500);
+        }
+      } catch {
+        /* clipboard unavailable */
+      }
+    });
+  }
+
+  function setup() {
+    setupCopy();
+
+    const headline = document.querySelector<HTMLElement>(".contact-headline");
+    const name = document.querySelector<HTMLInputElement>("[data-contact-name]");
+    const email = document.querySelector<HTMLInputElement>("[data-contact-email]");
+    if (!headline || !name || !email) return;
+
+    const initial = headline.textContent?.trim() || "Let's talk.";
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let current = initial;
+
+    const render = () => {
+      const nameValue = name.value.trim();
+      const emailValue = email.value.trim();
+      let next = initial;
+      if (emailValue) next = "Can't wait to chat!";
+      else if (nameValue) next = `Hi ${nameValue}!`;
+
+      if (next === current) return;
+      current = next;
+      headline.textContent = next;
+
+      if (!reduce) {
+        headline.animate(
+          [
+            { opacity: 0, transform: "translateY(0.3em)", filter: "blur(6px)" },
+            { opacity: 1, transform: "translateY(0)", filter: "blur(0)" },
+          ],
+          { duration: 500, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+        );
+      }
+    };
+
+    name.addEventListener("blur", render);
+    email.addEventListener("blur", render);
+  }
+
+  setup();
+  document.addEventListener("astro:page-load", setup);
+</script>

@@ -7,37 +7,127 @@ import { cn } from "@lib/cn";
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === "/" ? path === "/" : path.startsWith(href);
+
+const menuItems = [...mainNav, { label: "Contact us", href: "/contact" }];
 ---
 
-<header class="fixed w-full top-0 border-b border-border bg-surface z-50 ">
-  <Container width="full" class="font-sans text-md font-semibold tracking-tight flex h-8 items-center justify-between gap-6">
-    <a href="/" data-samepage class="">
-      {site.name}
-    </a>
+<header class="fixed top-0 z-50 w-full border-b border-border bg-surface">
+  <Container
+    width="full"
+    class="flex h-8 items-center justify-between gap-6 font-sans text-md font-semibold tracking-tight"
+  >
+    <a href="/" data-samepage>{site.name}</a>
 
-    <nav aria-label="Primary">
-      <ul class="flex items-center gap-6">
-        {
-          mainNav.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                data-samepage
-                aria-current={isActive(item.href) ? "page" : undefined}
-                class={cn(
-                  "transition-colors hover:text-accent",
-                  isActive(item.href) ? "text-text" : "text-muted",
-                )}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+    <nav aria-label="Primary" class="hidden items-center gap-6 md:flex">
+      {
+        mainNav.map((item) => (
+          <a
+            href={item.href}
+            data-samepage
+            aria-current={isActive(item.href) ? "page" : undefined}
+            class={cn(
+              "transition-colors hover:text-accent",
+              isActive(item.href) ? "text-text" : "text-muted",
+            )}
+          >
+            {item.label}
+          </a>
+        ))
+      }
     </nav>
-    <a href="/contact" data-samepage class="text-muted hover:text-accent">
+
+    <a
+      href="/contact"
+      data-samepage
+      class="hidden text-muted transition-colors hover:text-accent md:block"
+    >
       Contact us
     </a>
+
+    <button
+      type="button"
+      data-menu-toggle
+      aria-label="Open menu"
+      aria-expanded="false"
+      class="text-text md:hidden"
+    >
+      <svg
+        class="icon-bars size-6"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+      <svg
+        class="icon-xmark hidden size-6"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <line x1="5" y1="5" x2="19" y2="19" />
+        <line x1="19" y1="5" x2="5" y2="19" />
+      </svg>
+    </button>
   </Container>
+
+  <div data-menu hidden class="fixed inset-x-0 bottom-0 top-8 bg-surface md:hidden">
+    <nav aria-label="Mobile" class="flex flex-col gap-2 px-container py-8">
+      {
+        menuItems.map((item) => (
+          <a
+            href={item.href}
+            data-samepage
+            data-menu-link
+            aria-current={isActive(item.href) ? "page" : undefined}
+            class={cn(
+              "py-2 text-2xl transition-colors hover:text-accent",
+              isActive(item.href) ? "text-text" : "text-muted",
+            )}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
 </header>
+
+<script>
+  function setup() {
+    const toggle = document.querySelector<HTMLElement>("[data-menu-toggle]");
+    const menu = document.querySelector<HTMLElement>("[data-menu]");
+    if (!toggle || !menu) return;
+
+    const bars = toggle.querySelector(".icon-bars");
+    const xmark = toggle.querySelector(".icon-xmark");
+
+    let open = false;
+    const setOpen = (next: boolean) => {
+      open = next;
+      menu.hidden = !next;
+      toggle.setAttribute("aria-expanded", String(next));
+      toggle.setAttribute("aria-label", next ? "Close menu" : "Open menu");
+      bars?.classList.toggle("hidden", next);
+      xmark?.classList.toggle("hidden", !next);
+    };
+
+    toggle.addEventListener("click", () => setOpen(!open));
+    menu
+      .querySelectorAll("[data-menu-link]")
+      .forEach((link) => link.addEventListener("click", () => setOpen(false)));
+
+    setOpen(false);
+  }
+
+  setup();
+  document.addEventListener("astro:page-load", setup);
+</script>
