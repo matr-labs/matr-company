@@ -55,7 +55,7 @@ const { title = "Let's talk.", intro, action = "/api/contact" } = Astro.props;
         <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
       </div>
 
-      <div class="-ml-3">
+      <div >
       <ArrowLink type="submit" label="Send message" class="border-2 border-text"/>
             <ArrowLink label="Copy email" arrow={false} data-copy-email={site.email} />
 </div>
@@ -105,8 +105,8 @@ const { title = "Let's talk.", intro, action = "/api/contact" } = Astro.props;
       const nameValue = name.value.trim();
       const emailValue = email.value.trim();
       let next = initial;
-      if (emailValue) next = "Can't wait to chat!";
-      else if (nameValue) next = `Hi ${nameValue}!`;
+      if (emailValue) next = "Can't wait.";
+      else if (nameValue) next = `Hi, ${nameValue}!`;
 
       if (next === current) return;
       current = next;

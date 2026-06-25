@@ -1,0 +1,58 @@
+---
+import ImageBlock from "@ui/ImageBlock.astro";
+import { cn } from "@lib/cn";
+
+interface Props {
+  class?: string;
+  wrapperClass?: string;
+  [key: string]: unknown;
+}
+
+const { class: className, wrapperClass, ...rest } = Astro.props;
+---
+
+<div
+  class={cn("relative isolate overflow-hidden bg-white", wrapperClass)}
+  data-dither-image
+>
+  <canvas
+    data-dither-canvas
+    class="pointer-events-none absolute inset-0 z-10 h-full w-full [image-rendering:pixelated]"></canvas>
+  <ImageBlock {...rest} class={cn("relative z-20 mix-blend-screen", className)} />
+</div>
+
+<script>
+  import { DitherFill } from "@lib/dither";
+
+  function setup() {
+    document.querySelectorAll<HTMLElement>("[data-dither-image]").forEach((wrap) => {
+      if (wrap.dataset.ready === "1") return;
+      wrap.dataset.ready = "1";
+
+      const canvas = wrap.querySelector<HTMLCanvasElement>("[data-dither-canvas]");
+      if (!canvas) return;
+
+      const dither = new DitherFill(canvas, { px: 1, soft: 0.3 });
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) {
+        dither.set(1);
+        return;
+      }
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            io.disconnect();
+            dither.animateTo(1, 800);
+          });
+        },
+        { threshold: 0.25 },
+      );
+      io.observe(wrap);
+    });
+  }
+
+  setup();
+  document.addEventListener("astro:page-load", setup);
+</script>

@@ -3,7 +3,7 @@ import Section from "@ui/Section.astro";
 import Container from "@ui/Container.astro";
 import Heading from "@ui/Heading.astro";
 import H3 from "@ui/Heading.astro";
-import ImageBlock from "@ui/ImageBlock.astro";
+import DitherImage from "@ui/DitherImage.astro";
 import { home } from "@content/home";
 const { manifesto } = home;
 ---
@@ -14,11 +14,12 @@ const { manifesto } = home;
   class="manifesto relative flex min-h-[72svh] flex-col justify-center overflow-hidden"
 >
   <div class="manifesto__media" data-parallax>
-    <ImageBlock
+    <DitherImage
       src={manifesto.image}
       alt={manifesto.imageAlt}
       loading="lazy"
       sizes="(min-width: 600px) 50vw, 100vw"
+      wrapperClass="h-full w-full"
       class="h-full w-full object-cover"
     />
   </div>
